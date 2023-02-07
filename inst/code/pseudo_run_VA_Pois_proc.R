@@ -2,7 +2,7 @@
 #data simulation
 N=100
 Tp <- 63
-Y <-matrix( rpois(N*Tp, lambda = 20), ncol=Tp)+1#offset to avoid problem due to 0 count
+Y <-matrix( rpois(N*Tp, lambda = 2), ncol=Tp)+1#offset to avoid problem due to 0 count
 
 
 ### parameters/arguments
