@@ -50,26 +50,67 @@ get_empirical_intensity <- function(x,indx_lst)
 
 
 
-logit <- function( p)
-{
-  if( p>1 & p<0)
-  {
-    print(" p must be between 0 and 1, introducing NA")
-    out <-NA
-  }
-  else{
-    out <- log( p/(1-p))
-  }
-
-  return(out)
+#' @export
+logit = function(x){
+  log(x/(1-x))
+}
+#' @export
+sigmoid = function(x){
+  1/(1+exp(-x))
 }
 
+get_post_log_int <- function(Mu_pm,
+                             Mu_pv,
+                             Y_min,
+                             Y_tot,
+                             sigma2_bin,
+                             sigma2_pois,
+                             b_pm,
+                             gh_points,
+                             tol=1e-5){
 
 
 
 
 
+  Mu_pm[Mu_pm==-Inf] =  logit(0.1)
+  Mu_pm[Mu_pm==Inf] =  logit(0.9)
+  ### basic working exemple
+  init_val_bin = c(c(Mu_pm[ ,-ncol(Y_min)]),log(c(Mu_pv[ ,-ncol(Y_min)])))
+  init_val_pois =  Mu_pm[,ncol(Y_min)]
 
+
+  beta_bin  <-  c(b_pm[ ,-ncol(Y_min)])
+  beta_pois <-  c(b_pm[ , ncol(Y_min)])
+  opt_binomial<- vga_binomial(init_val=init_val,
+                              x=c(Y_min [ ,-ncol(Y_min)]),
+                              nb=c(Y_tot[ ,-ncol(Y_min)]),
+                              beta= beta_bin,
+                              sigma2=sigma2_bin,
+                              gh_points=gh_points)
+  opt_Poisson <- vga_pois_solver (init_val= ,
+                                  x=Y_min[,ncol(Y_min)],
+                                  s= rep( 1, nrow(Y)),
+                                  beta= beta_pois,
+                                  sigma2=sigma2_pois,
+                                  maxiter=10,
+                                  tol=tol,
+                                  method = 'newton')
+
+
+  A_pm <- cbind(matrix(opt_binomial$m, ncol = (ncol(Y_min)-1)), opt_Poisson$m) # we are missing C column
+
+  A_pv <- cbind(matrix(opt_binomial$v, ncol = (ncol(Y_min)-1)), opt_Poisson$v) # we are missing C column
+
+  #need Beta and beta posterior variance
+  # Update sigma2
+  ##sigma2 = mean(opt_binomial$m^2+opt_binomial$v+beta_bin^2+b_pv-2*b_pm*opt_binomial$m) #
+  #Posterior variance fitted value??
+
+  return(  list(A_pm = A_pm,
+                A_pv = A_pv)
+        )
+}
 
 
 

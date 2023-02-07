@@ -108,6 +108,89 @@ binomial_mean_splitting = function(x,nb=1,
 
 
 #' @export
+
+#data simulation
+#N=100
+#Tp <- 63
+#Y <-matrix( rpois(N*Tp, lambda = 20), ncol=Tp)+1#offset to avoid problem due to 0 count
+
+
+### parameters/arguments
+#b_pm_init start posterior mean
+#reflect =FALSE
+#verbose=TRUE
+#n_gh = 10 #nb points for Gauss Hermite quadrature
+#
+
+### data formating ------
+
+
+#b_pm = 0*Y
+# if(missing(b_pm_init)){
+#   b_pm = 0*Y
+# }else{
+#   b_pm = b_pm_init #posterior mean
+# }
+
+
+#gh_points = fastGHQuad::gaussHermiteData(n_gh)
+#J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
+#if(reflect){
+#  #  tl <- lapply(1:nrow(Y), function(i) reflect_vec(Y[i,]))
+#  Y <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$x))
+#  idx_out <- tl[[1]]$idx #### indx of interest at the end
+#}
+#
+#indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
+#
+#tl <-  lapply(1:nrow(Y), function(i)
+# get_empirical_intensity(Y[i,],
+#                          indx_lst = indx_lst)
+#)
+
+#Y_min <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$Y_min))
+#Y_tot <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$Y_tot))
+#rm(tl)
+
+#if(verbose){
+#  print("done transforming data")
+#}
+# get the matrix for Binomial reg (and Pois reg for top coefficient)
+
+
+
+
+
+#deal with case exactly one or exactly 0
+
+
+#Mu_pm = logit((Y_min/Y_tot) ) #remove last column contain C coeff#
+
+#Mu_pm[Mu_pm==-Inf] =  logit(0.1)
+#Mu_pm[Mu_pm==Inf] =  logit(0.9)
+#Mu_pv = 1/Y_tot
+
+
+
+
+#### basic working exemple
+
+#x <- Y_min [1,-ncol(Y_min)]
+#nb <- Y_tot[1,-ncol(Y_min)]
+#mu_pm <- Mu_pm[1,]#init value
+#mu_pv <- rep(1/length(x),length(x))[-ncol(Y_min)]#init value
+#b_pm <- 0*x
+#sigma2 =2
+# here everything is a vector (not sigma^2) mu_pm and mu_
+#
+#check line 52 VA_binomial
+#opt<- vga_binomial(c(mu_pm,log(mu_pv)),x,nb,b_pm,sigma2,gh_points=gh_points)
+#plot(opt$m,mu_pm)
+#abline(a=0,b=1)
+#mu_pm = opt$m
+#mu_pv = opt$v
+
+
 vga_binomial = function(init_val,x,nb,beta,sigma2,method='lbfgs',gh_points){
   if(method!="lbfgs"){
     stop('only lbfgs is implemented')
@@ -167,140 +250,4 @@ Elog1pexp_dlv = function(m,lv,gh_points){
   return(c((mat2*sigmoid(mat))%*%gh_points$w)/sqrt(pi))
 }
 
-# Elog1pexp = function(m,v,gh_points){
-#   res=c()
-#   for(i in 1:length(m)){
-#     res[i] = ghQuad(log1pexp_func,gh_points,m=m[i],v=v[i])/sqrt(pi)
-#   }
-#   return(res)
-# }
-#
-# log1pexp_func = function(x,m,v){
-#   return( log1pexp(sqrt(2*v)*x+m))
-# }
-#' @export
-logit = function(x){
-  log(x/(1-x))
-}
-#' @export
-sigmoid = function(x){
-  1/(1+exp(-x))
-}
-#' @export
-Esigmoid = function(m,v,gh_points){
-  mat = outer(sqrt(2*v),gh_points$x,FUN='*') + m
-  return(c(sigmoid(mat)%*%gh_points$w)/sqrt(pi))
-}
 
-# Esigmoid = function(m,v,gh_points){
-#   res=c()
-#   for(i in 1:length(m)){
-#     res[i] = ghQuad(sigmoid_func,gh_points,m=m[i],v=v[i])/sqrt(pi)
-#   }
-#   return(res)
-# }
-#
-# sigmoid_func = function(x,m,v){
-#   return(sigmoid(sqrt(2*v)*x+m))
-# }
-
-#' @export
-binomial_mean_GG = function(x,nb,beta=NULL,sigma2=NULL,
-                            est_prior_mean =TRUE,
-                            est_prior_var = TRUE,
-                            m_init = NULL,
-                            v_init = NULL,
-                            maxiter=100,tol=1e-5,n_gh = 10,printevery = 1){
-
-  n = length(x)
-  if(is.null(m_init)){
-    m = logit(x/nb)
-    m[m==-Inf] = logit(0.1)
-    m[m==Inf] = logit(0.9)
-  }else{
-    m = m_init
-  }
-
-  if(is.null(v_init)){
-    v = rep(1/n,n)
-  }else{
-    v = v_init
-  }
-
-  gh_points = gaussHermiteData(n_gh)
-  const = sum(lfactorial(nb)-lfactorial(x)-lfactorial(nb-x))
-  obj = -Inf
-
-  for(iter in 1:maxiter){
-    if(est_prior_mean){
-      beta = mean(m)
-    }
-    if(est_prior_var){
-      sigma2 = mean(m^2+v-2*m*beta+beta^2)
-    }
-
-
-    opt = vga_binomial(c(m,log(v)),x,nb,beta,sigma2,gh_points=gh_points)
-    m = opt$m
-    v = opt$v
-
-    # ELBO
-    obj[iter+1] = sum(x*m-nb*Elog1pexp(m,v,gh_points)) +const - n/2*log(2*pi*sigma2)
-    - sum(m^2 + v + beta^2 - 2*m*beta)/2/sigma2 + sum(log(2*pi*v))/2 - n/2
-
-    if(iter%%printevery==0){
-      print(paste('At iter', iter, 'elbo=',round(obj[iter+1],3)))
-    }
-    if((obj[iter+1]-obj[iter])<tol){
-      obj = obj[1:(iter+1)]
-      if((obj[iter+1]-obj[iter])<0){
-        warning('An iteration decreases ELBO. This is likely due to numerical issues.')
-      }
-      break
-    }
-  }
-
-  return(list(posterior = list(mean_logit = m,
-                               mean = Esigmoid(m,v,gh_points)),
-              fitted_g = list(beta=beta,sigma2=sigma2),
-              elbo=obj[length(obj)],
-              obj_trace = obj
-  ))
-
-}
-
-#' @export
-binomial_smooth = function(x,nb,sigma2_init=NULL, est_sigma2=TRUE,maxiter=100,tol=1e-4,n_gh=10,filter.number = 1,
-                           Eb_init = NULL,
-                           family = 'DaubExPhase',ebnm_params=list(mode=0)){
-  n = length(x)
-  W = (t(GenW(n,filter.number,family)))[-1,]
-  obj = -Inf
-  sigma2 = sigma2_init
-  gh_points = gaussHermiteData(n_gh)
-  #Eb = logit(mean(x))
-  if(is.null(Eb_init)){
-    Eb = rep(0,n)
-  }else{
-    Eb = Eb_init
-  }
-  opt = vga_binomial(c(Eb,rep(1/n,n)),x,nb,Eb,sigma2,gh_points=gh_points)
-  m = opt$m
-  v = opt$v
-  for(iter in 1:maxiter){
-
-    qb = smash_dwt(m,sqrt(sigma2),filter.number=filter.number,family=family,ebnm_params=ebnm_params,W=W)
-    Eb = qb$posterior$mean
-    Eb2 = qb$posterior$var + Eb^2
-
-    opt = vga_binomial(c(m,log(v)),x,nb,Eb,sigma2,gh_points=gh_points)
-    m = opt$m
-    v = opt$v
-
-    if(est_sigma2){
-      sigma2 = mean(m^2+v+Eb2-2*m*Eb)
-    }
-
-  }
-  return(list(Eb=Eb,m=m,sigma2=sigma2))
-}

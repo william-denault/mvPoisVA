@@ -1,8 +1,8 @@
 
 #data simulation
-N=1000
+N=100
 Tp <- 63
-Y <-matrix( rpois(N*Tp, lambda = 20), ncol=Tp)
+Y <-matrix( rpois(N*Tp, lambda = 20), ncol=Tp)+1#offset to avoid problem due to 0 count
 
 
 ### parameters/arguments
@@ -14,7 +14,26 @@ n_gh = 10 #nb points for Gauss Hermite quadrature
 
 ### data formating ------
 
+init=TRUE
+gh_points = fastGHQuad::gaussHermiteData(n_gh)
+J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
+if(reflect){
+  tl <- lapply(1:nrow(Y), function(i) reflect_vec(Y[i,]))
+  Y <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$x))
+  idx_out <- tl[[1]]$idx #### indx of interest at the end
+}
 
+
+
+indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
+
+tl <-  lapply(1:nrow(Y), function(i)
+  get_empirical_intensity(Y[i,],
+                          indx_lst = indx_lst)
+)
+
+Y_min <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$Y_min))
+Y_tot <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$Y_tot))
 b_pm = 0*Y
 # if(missing(b_pm_init)){
 #   b_pm = 0*Y
@@ -23,13 +42,6 @@ b_pm = 0*Y
 # }
 
 
-gh_points = fastGHQuad::gaussHermiteData(n_gh)
-J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
-if(reflect){
-  tl <- lapply(1:nrow(Y), function(i) reflect_vec(Y[i,]))
-  Y <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$x))
-  idx_out <- tl[[1]]$idx #### indx of interest at the end
-}
 
 indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
 
@@ -49,43 +61,73 @@ if(verbose){
 
 
 
-
+sum(is.na(Y_min))
 
 #deal with case exactly one or exactly 0
 
-Mu_pm = logit((Y_min/Y_tot)[,-ncol(Y_min)]) #Y_min/Y_tot
-#PB which 0 count bin
-Mu_pm[which(is.nat(Mu_pm))] =logit(0.5)
-
+Mu_pm = logit((Y_min/Y_tot) ) #remove last column contain C coeff
 Mu_pm[Mu_pm==-Inf] =  logit(0.1)
-Mu_pm[Mu_pm==Inf] =  logit(0.9)
+Mu_pm[Mu_pm==Inf]  =  logit(0.9)
+
+Mu_pm[,ncol(Y_min)] <- log(Y_min[,ncol(Y_min)])
 Mu_pv = 1/Y_tot
+  Mu_pm[Mu_pm==-Inf] =  logit(0.1)
+  Mu_pm[Mu_pm==Inf] =  logit(0.9)
+  ### basic working exemple
+  init_val_bin = c(c(Mu_pm[ ,-ncol(Y_min)]),log(c(Mu_pv[ ,-ncol(Y_min)])))
+  init_val_pois = log(Y_min[,ncol(Y_min)])
+
+  sigma2_bin=1
+  sigma2_pois =1
+  beta_bin  <-  c(b_pm[ ,-ncol(Y_min)])
+  beta_pois <-  c(b_pm[ , ncol(Y_min)])
 
 
+  init_val=init_val_bin
+  x=c(Y_min [ ,-ncol(Y_min)])
+  nb=c(Y_tot[ ,-ncol(Y_min)])
+  beta= beta_bin
+  sigma2=sigma2_bin
+
+  opt_binomial<- vga_binomial(init_val=init_val_bin,
+                              x=c(Y_min [ ,-ncol(Y_min)]),
+                              nb=c(Y_tot[ ,-ncol(Y_min)]),
+                              beta= beta_bin,
+                              sigma2=sigma2_bin,
+                              gh_points=gh_points)
+  opt_Poisson <- vga_pois_solver (init_val= init_val_pois,
+                                  x=Y_min[,ncol(Y_min)],
+                                  s= rep( 1, nrow(Y)),
+                                  beta= beta_pois,
+                                  sigma2=sigma2_pois,
+                                  maxiter=10,
+                                  tol=tol,
+                                  method = 'newton')
 
 
+  A_pm <- cbind(matrix(opt_binomial$m, ncol = (ncol(Y_min)-1)), opt_Poisson$m) # we are missing C column
 
-Mu_pm = logit(x/nb) #Y_min/Y_tot
+  A_pv <- cbind(matrix(opt_binomial$v, ncol = (ncol(Y_min)-1)), opt_Poisson$v) # we are missing C column
 
-Mu_pm[mu_pm==-Inf] = logit(0.1)
-Mu_pm[mu_pm==Inf] = logit(0.9)
-Mu_pv = rep(1/n,n)
+  #need Beta and beta posterior variance
+  # Update sigma2
+  ##sigma2 = mean(opt_binomial$m^2+opt_binomial$v+beta_bin^2+b_pv-2*b_pm*opt_binomial$m) #
+  #Posterior variance fitted value??
 
+ theta <- init_val_bin
+ n <- length(x)
+    m = theta[1:n]
+    lv = theta[(n+1):(2*n)]
+    val = - sum(x*m - nb*Elog1pexp(m,exp(lv),gh_points) - (m^2+exp(lv)-2*m*beta)/2/sigma2 + lv/2)
+    return(val)
 
-# here everything is a vector (not sigma^2) mu_pm and mu_
+  #' @export
+  vga_binom_obj_grad = function(theta,x,nb,beta,sigma2,n,gh_points){
+    m = theta[1:n]
+    lv = theta[(n+1):(2*n)]
+    dm = - (x - nb*Elog1pexp_dm(m,exp(lv),gh_points) - (m-m*beta)/sigma2)
+    dlv = - (- nb*Elog1pexp_dlv(m,lv,gh_points) - exp(lv)/2/sigma2 + 1/2)
+    return(c(dm,dlv))
+  }
 
-#check line 52 VA_binomial
-opt<- vga_binomial(c(mu_pm,log(mu_pv)),x,nb,b_pm,sigma2,gh_points=gh_points)
-mu_pm = opt$m
-mu_pv = opt$v
-opt = vga_binomial(c(mu_pm,log(mu_pv)),x,nb,b_pm,sigma2,gh_points=gh_points)
-mu_pm = opt$m
-mu_pv = opt$v
-
-
-b_pv = res$posterior$sd^2
-H = res$log_likelihood + n*(log(2*pi*sigma2)/2)+sum((mu_pm^2-2*mu_pm*b_pm+b_pm^2+b_pv)/sigma2/2)
-
-# Update sigma2
-sigma2 = mean(mu_pm^2+mu_pv+b_pm^2+b_pv-2*b_pm*mu_pm)
 
