@@ -44,6 +44,12 @@ get_empirical_intensity <- function(x,indx_lst)
 }
 
 
+#alpha, lambda_tot
+
+reverse_log_intensity <- function( ){
+
+}
+
 
 
 
@@ -82,20 +88,24 @@ get_post_log_int <- function(Mu_pm,
 
   beta_bin  <-  c(b_pm[ ,-ncol(Y_min)])
   beta_pois <-  c(b_pm[ , ncol(Y_min)])
-  opt_binomial<- vga_binomial(init_val=init_val,
-                              x=c(Y_min [ ,-ncol(Y_min)]),
-                              nb=c(Y_tot[ ,-ncol(Y_min)]),
-                              beta= beta_bin,
-                              sigma2=sigma2_bin,
-                              gh_points=gh_points)
-  opt_Poisson <- vga_pois_solver (init_val= ,
-                                  x=Y_min[,ncol(Y_min)],
-                                  s= rep( 1, nrow(Y)),
-                                  beta= beta_pois,
-                                  sigma2=sigma2_pois,
-                                  maxiter=10,
-                                  tol=tol,
-                                  method = 'newton')
+
+
+  opt_binomial <- vga_binomial(init_val  = init_val_bin,
+                               x         = c(Y_min [ ,-ncol(Y_min)]),
+                               nb        = c(Y_tot[ ,-ncol(Y_min)]),
+                               beta      = beta_bin,
+                               sigma2    = sigma2_bin,
+                               gh_points = gh_points)
+
+
+  opt_Poisson  <- vga_pois_solver(init_val = init_val_pois ,
+                                  x        = Y_min[,ncol(Y_min)],
+                                  s        = rep( 1, nrow(Y)),
+                                  beta     = beta_pois,
+                                  sigma2   = sigma2_pois,
+                                  maxiter  = 10,
+                                  tol      = tol,
+                                  method   = 'newton')
 
 
   A_pm <- cbind(matrix(opt_binomial$m, ncol = (ncol(Y_min)-1)), opt_Poisson$m) # we are missing C column
@@ -185,4 +195,59 @@ reflect_vec <- function (x)
     x = c(x.ini, x.mir)
     return(list(x = x, idx = (lnum + 1):(lnum + n)))
   }
+}
+
+
+
+## inverse function of get_empirical_intensity
+
+reverse_intensity_transform =function(vec_int, indx_lst,is.logprob=TRUE, is.prob=FALSE, is.log_int=TRUE ){
+
+  J=log2(length(vec_int))
+
+  if( is.prob){
+    lp <- log(vec_int[- length(vec_int)])
+    lq = log(1-pmin(exp(lp),1-1e-10))
+  }
+  if(is.logprob){
+
+    lp <-  (vec_int[- length(vec_int)])
+    lq =   log(1-pmin( exp(lp),1-1e-10))
+  }
+  if( is.log_int){
+   log_lambda_tot <- vec_int[  length(vec_int)]
+  }else{
+    print( "assuming input is total intensity ")
+    log_lambda_tot <- log(vec_int[  length(vec_int)])
+   }
+
+
+
+  out <- rep( log_lambda_tot , 2^J)
+
+  for(s in (J ):1){
+
+    nD = 2^(J-s+1)
+    nDo2 = nD/2
+    tt <-1
+    for(l in 0:(2^(s-1)-1)){
+      ind = (l*nD+1):((l+1)*nD) # all "sub index for coef s,l (here s=D)
+      # print(ind)
+      ind_l <-  ind[1:nDo2] #all "sub index in the left for coef s,l (here s=D)
+      ind_r <-  ind[(nDo2+1):nD] # all "sub index in the right for coef s,l (here s=D)
+      out[ind_l] <- out[ind_l]+ lp[indx_lst[[(s )]][tt]]
+      out[ind_r] <- out[ind_r]+ lq[indx_lst[[(s )]][tt]]
+      tt <- tt+1
+    }
+  }
+  return(exp(out))
+
+}
+
+
+
+#' Interleave two vectors.
+#' @keywords internal
+interleave=function(x,y){
+  return(as.vector(rbind(x,y)))
 }

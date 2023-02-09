@@ -1,5 +1,6 @@
 mv_Poisproc_reg <- function(Y,
                             X,
+                            prior_mv=  "mixture_normal_per_scale",
                             reflect =FALSE,
                             verbose=TRUE,
                             n_gh = 10,
@@ -17,7 +18,8 @@ mv_Poisproc_reg <- function(Y,
                                                   eps = 1e-6,
                                                   numiter.em = 4
                                                   ),
-                            thresh_lowcount=0
+                            thresh_lowcount=0,
+                            gridmult=sqrt(2)
                             )
 {
 
@@ -31,7 +33,7 @@ mv_Poisproc_reg <- function(Y,
   }
   init=TRUE
   gh_points = fastGHQuad::gaussHermiteData(n_gh)
-
+  X <- susiF.alpha:::colScale(X)
 ##initiatilzation for count data -----
 
 
@@ -43,6 +45,8 @@ mv_Poisproc_reg <- function(Y,
     Y <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$x))
     idx_out <- tl[[1]]$idx #### indx of interest at the end
   }
+
+
  indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
  ### Wavelet like transform -----
   tl <-  lapply(1:nrow(Y), function(i)
@@ -58,8 +62,11 @@ mv_Poisproc_reg <- function(Y,
     print("done transforming data")
   }
 
+  ###initialization for functional reg object -----
+  lowc_wc <-   susiF.alpha::which_lowcount(Y_f=Y_min ,###TODO double check that
+                                           thresh_lowcount=thresh_lowcount)
 
-  if(init){
+  ###Initialization dynamic param
     Mu_pm = logit((Y_min/Y_tot) ) #remove last column contain C coeff
     Mu_pm[Mu_pm==-Inf] =  logit(0.1)
     Mu_pm[Mu_pm==Inf]  =  logit(0.9)
@@ -71,14 +78,12 @@ mv_Poisproc_reg <- function(Y,
     }
    sigma2_bin  = 1
    sigma2_pois = 1
-  }
-  ##initialization for functional reg object -----
-  lowc_wc <-   susiF.alpha::which_lowcount(Y_f,thresh_lowcount)
+
 
 
  while( check >tol & iter <maxit){
 
-#### Check potential pb due to centering
+   #### Check potential pb due to centering
    post_mat <- get_post_log_int(Mu_pm       = Mu_pm,
                                 Mu_pv       = Mu_pv,
                                 Y_min       = Y_min,
@@ -88,29 +93,65 @@ mv_Poisproc_reg <- function(Y,
                                 b_pm        = b_pm,
                                 gh_points   = gh_points,
                                 tol         = tol_vga_pois)
+   if(verbose){
+     print( paste('Posterior log intensity computed for iter ',iter))
+   }
    Mu_pm <- post_mat$A_pm
    Mu_pv <- post_mat$A_pv
 
 
    tmp_Mu_pm <- Mu_pm - colMeans(Mu_pm, na.rm = TRUE) #potentially run smash on colmean
+   W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
+              C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
 
 
-   EBmvFR.obj   <- EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
-                                    W              = tmp_Mu_pm ,
-                                    X              = X,
-                                    tol            = tol.mrash,
-                                    low_wc         = low_wc,
-                                    init_pi0_w     = init_pi0_w.mrash ,
-                                    control_mixsqp = control_mixsqp ,
-                                    indx_lst       = indx_lst,
-                                    nullweight     = nullweight.mrash,
-                                    cal_obj        = cal_obj.mrash,
-                                    verbose        = verbose.mrash,
-                                    maxit          = maxit.mrash)
 
-   b_pm <-   X%*%EBmvFR.obj$fitted_func+ colMeans(Mu_pm, na.rm = TRUE)
+   if(init){
+
+     temp <- susiF.alpha:: init_prior(Y              = tmp_Mu_pm,
+                                      X              = X,
+                                      prior          = prior_mv ,
+                                      v1             = v1,
+                                      indx_lst       = indx_lst,
+                                      lowc_wc        = lowc_wc,
+                                      control_mixsqp = control_mixsqp,
+                                      nullweight     = nullweight.mrash,
+                                      gridmult       = gridmult )
+     G_prior     <- temp$G_prior
+
+
+     #Recycled for the first step of the while loop
+     EBmvFR.obj   <-  susiF.alpha::init_EBmvFR_obj(G_prior = G_prior,
+                                                   Y       = Y,
+                                                   X       = X
+     )
+
+     init=FALSE
+   }
+### TODO: Maybe use better restarting point for EBmvFR.obj
+   EBmvFR.obj   <- susiF.alpha::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
+                                                 W              = W,
+                                                 X              = X,
+                                                 tol            = tol.mrash,
+                                                 lowc_wc        = lowc_wc  ,
+                                                 init_pi0_w     = init_pi0_w.mrash ,
+                                                 control_mixsqp = control_mixsqp ,
+                                                 indx_lst       = indx_lst,
+                                                 nullweight     = nullweight.mrash,
+                                                 cal_obj        = cal_obj.mrash,
+                                                 verbose        = verbose.mrash,
+                                                 maxit          = maxit.mrash
+   )
+   if(verbose){
+     print( paste('Posterior of regression coefficient computed for iter ',iter))
+   }
+   b_pm <-   X%*%EBmvFR.obj$fitted_wc[[1]]+ colMeans(Mu_pm, na.rm = TRUE)
+  # l_bpm[[iter]] =b_pm
+   iter=iter+1
    ##include mr.ash
  }
+
+
 
 ### !!!! idx_out
 
