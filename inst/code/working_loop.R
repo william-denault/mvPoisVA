@@ -74,18 +74,13 @@ Mu_pv = 1/Y_tot
   Mu_pm[Mu_pm==-Inf] =  logit(0.1)
   Mu_pm[Mu_pm==Inf] =  logit(0.9)
 
-  emp_prop <- Y_min[1,]/Y_tot[1,]
-  emp_log_prop <- log(emp_prop[- length(emp_prop)])
-  plot(emp_prop)
-  emp_lambda_tot <- Y_tot[1,ncol(Y_tot)]
-  emp_log_lambda_tot <- log(emp_lambda_tot )
 
 
   ### basic working exemple
   init_val_bin = c(c(Mu_pm[ ,-ncol(Y_min)]),log(c(Mu_pv[ ,-ncol(Y_min)])))
   init_val_pois = log(Y_min[,ncol(Y_min)])
 
-  sigma2_bin=1
+  sigma2_bin  =1
   sigma2_pois =1
   beta_bin  <-  c(b_pm[ ,-ncol(Y_min)])
   beta_pois <-  c(b_pm[ , ncol(Y_min)])
@@ -126,6 +121,7 @@ Mu_pv = 1/Y_tot
 
 
 
+
   tt <- reverse_intensity_transform (vec_int = c(log( sigmoid( A_pm[1,-ncol(A_pm)])), A_pm[1,ncol(A_pm)]) ,
                                      indx_lst = indx_lst,
                                      is.logprob=TRUE,
@@ -133,5 +129,4 @@ Mu_pv = 1/Y_tot
   plot(tt)
   lines(tt, col="green")
   lines(Y[1,])
-
 

@@ -73,6 +73,22 @@ Mu_pm[,ncol(Y_min)] <- log(Y_min[,ncol(Y_min)])
 Mu_pv = 1/Y_tot
   Mu_pm[Mu_pm==-Inf] =  logit(0.1)
   Mu_pm[Mu_pm==Inf] =  logit(0.9)
+
+
+  tt <- reverse_intensity_transform (vec_int = c(Mu_pm[1,]),
+                                     indx_lst = indx_lst,
+                                     is.logprob=TRUE,
+                                     is.log_int =TRUE)
+  plot(tt)
+  lines(Y[1,])
+
+
+  tt <- reverse_intensity_transform (vec_int = c(logit(exp(Mu_pm[1,]))),
+                                     indx_lst = indx_lst,
+                                     is.logprob=TRUE,
+                                     is.log_int =TRUE)
+  plot(tt)
+
   ### basic working exemple
   init_val_bin = c(c(Mu_pm[ ,-ncol(Y_min)]),log(c(Mu_pv[ ,-ncol(Y_min)])))
   init_val_pois = log(Y_min[,ncol(Y_min)])
@@ -103,31 +119,40 @@ Mu_pv = 1/Y_tot
                                   maxiter=10,
                                   tol=tol,
                                   method = 'newton')
-
-
   A_pm <- cbind(matrix(opt_binomial$m, ncol = (ncol(Y_min)-1)), opt_Poisson$m) # we are missing C column
 
   A_pv <- cbind(matrix(opt_binomial$v, ncol = (ncol(Y_min)-1)), opt_Poisson$v) # we are missing C column
+  plot( Mu_pm[1,], A_pm[1,])
+  abline(a=0,b=1)
+
 
   #need Beta and beta posterior variance
   # Update sigma2
   ##sigma2 = mean(opt_binomial$m^2+opt_binomial$v+beta_bin^2+b_pv-2*b_pm*opt_binomial$m) #
   #Posterior variance fitted value??
 
- theta <- init_val_bin
- n <- length(x)
-    m = theta[1:n]
-    lv = theta[(n+1):(2*n)]
-    val = - sum(x*m - nb*Elog1pexp(m,exp(lv),gh_points) - (m^2+exp(lv)-2*m*beta)/2/sigma2 + lv/2)
-    return(val)
-
-  #' @export
-  vga_binom_obj_grad = function(theta,x,nb,beta,sigma2,n,gh_points){
-    m = theta[1:n]
-    lv = theta[(n+1):(2*n)]
-    dm = - (x - nb*Elog1pexp_dm(m,exp(lv),gh_points) - (m-m*beta)/sigma2)
-    dlv = - (- nb*Elog1pexp_dlv(m,lv,gh_points) - exp(lv)/2/sigma2 + 1/2)
-    return(c(dm,dlv))
-  }
 
 
+
+  tt <- reverse_intensity_transform (vec_int = c(log( sigmoid( A_pm[1,-ncol(A_pm)])), A_pm[1,ncol(A_pm)]) ,
+                                     indx_lst = indx_lst,
+                                     is.logprob=TRUE,
+                                     is.log_int =TRUE)
+  plot(tt)
+  lines(Y[1,])
+
+
+
+  tt <- reverse_intensity_transform (vec_int = c(log( sigmoid( A_pm [1,])) ),
+                                     indx_lst = indx_lst,
+                                     is.logprob=TRUE,
+                                     is.log_int =TRUE)
+  plot(tt)
+  lines(0.01*Y[1,])
+
+  tt <- reverse_intensity_transform (vec_int = c( Mu_pm[1,]),
+                                     indx_lst = indx_lst,
+                                     is.logprob=TRUE,
+                                     is.log_int =TRUE)
+  plot(tt)
+  lines(Y[1,])

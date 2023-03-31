@@ -120,7 +120,7 @@ reverse_intensity_transform =function(vec_int, indx_lst,
     for(l in 0:(2^(s-1)-1)){
       ind = (l*nD+1):((l+1)*nD) # all "sub index for coef s,l (here s=D)
 
-      print(ind)
+     # print(ind)
       ind_l <-  ind[1:nDo2] #all "sub index in the left for coef s,l (here s=D)
       ind_r <-  ind[(nDo2+1):nD] # all "sub index in the right for coef s,l (here s=D)
       out[ind_l] <- out[ind_l]+ lp[indx_lst[[(s )]][tt]]
@@ -217,10 +217,14 @@ get_ind_fitted_Poisproc <- function(post_mat,indx_lst ){
 
   fitted_Pois <- lapply(1:nrow( fitted_Pois),
                         function( i)
-                          reverse_intensity_transform(vec_int  = fitted_Pois[i,],
+                          reverse_intensity_transform(vec_int  =   c( fitted_Pois[i,-ncol( fitted_Pois)] ,
+                                                                     fitted_Pois[i,ncol(fitted_Pois)]),
                                                       indx_lst = indx_lst,
                                                       is.logprob=TRUE,
                                                       is.log_int =TRUE) )
+
+
+
   fitted_Pois <- do.call(rbind,fitted_Pois)
   return( fitted_Pois)
 }

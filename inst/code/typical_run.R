@@ -6,10 +6,10 @@ init=TRUE
 set.seed(1)
 #Example using curves simulated under the Mixture normal per scale prior
 check=1
-N <- 100    #Number of individuals
+N <- 200    #Number of individuals
 P <- 10     #Number of covariates/SNP
 pos1 <- 1   #Position of the causal covariate for effect 1
-pos2 <- 5   #Position of the causal covariate for effect 2
+pos2 <- 7   #Position of the causal covariate for effect 2
 lev_res <- 7#length of the molecular phenotype (2^lev_res)
 f1 <- sim_intenisty(lev_res )$sim_intens[-1]#first effect
 f2 <- sim_intenisty(lev_res )$sim_intens[-1]#second effect
@@ -57,7 +57,7 @@ legend(x=0.3,
 
 
 Y <-count.data
-X <- G
+X <-   G ###### Include intercept----
 
 
 
@@ -161,8 +161,8 @@ while( check >tol & iter <5){
   Mu_pv <- post_mat$A_pv
 
 
-  tmp_Mu_pm <- Mu_pm - colMeans(Mu_pm, na.rm = TRUE) #potentially run smash on colmean
-  W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
+  tmp_Mu_pm <- Mu_pm -  apply(Mu_pm, 2, median)#potentially run smash on colmean
+   W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
              C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
 
 
@@ -170,7 +170,7 @@ while( check >tol & iter <5){
   if(init){
 
     temp <- susiF.alpha:: init_prior(Y              = tmp_Mu_pm,
-                                     X              = X,
+                                     X              = X ,
                                      prior          = prior_mv ,
                                      v1             = v1,
                                      indx_lst       = indx_lst,
@@ -206,7 +206,7 @@ while( check >tol & iter <5){
   if(verbose){
     print( paste('Posterior of regression coefficient computed for iter ',iter))
   }
-  b_pm <-   X%*%EBmvFR.obj$fitted_wc[[1]]+ matrix( colMeans(Mu_pm, na.rm = TRUE), byrow = TRUE,
+  b_pm <-   X%*%  EBmvFR.obj$fitted_wc[[1]]    +  matrix( apply(Mu_pm, 2, median), byrow = TRUE,
                                                    nrow=nrow(X), ncol=ncol(Y))
   l_bpm[[iter]] =b_pm
   iter=iter+1
@@ -215,10 +215,10 @@ while( check >tol & iter <5){
 
 
 
-fitted_ind_Pois <- get_ind_fitted_Poisproc(post_mat = post_mat$A_pm, indx_lst = indx_lst)
+fitted_ind_Pois <- get_ind_fitted_Poisproc(post_mat = b_pm, indx_lst = indx_lst)
 
-plot( fitted_ind_Pois[9,])
-lines(Y[9,])
+plot( fitted_ind_Pois[10,])
+lines(Y[10,])
 
 c_mean <- colMeans(Mu_pm)
 get_fitted_Poisproc <-function( EBmvFR.obj,c_mean,indx_lst){
