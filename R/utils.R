@@ -317,6 +317,37 @@ log1pexp = function (x){
 
 
 
+reflect_vec <- function (x)
+{
+  n = length(x)
+  J = log2(n)
+  if ((J%%1) == 0) {
+    x = c(x, x[n:1])
+    return(list(x = x, idx = 1:n))
+  }
+  else {
+    n.ext = 2^ceiling(J)
+    lnum = round((n.ext - n)/2)
+    rnum = n.ext - n - lnum
+    if (lnum == 0) {
+      x.lmir = NULL
+    }
+    else {
+      x.lmir = x[lnum:1]
+    }
+    if (rnum == 0) {
+      x.rmir = NULL
+    }
+    else {
+      x.rmir = x[n:(n - rnum + 1)]
+    }
+    x.ini = c(x.lmir, x, x.rmir)
+    x.mir = x.ini[n.ext:1]
+    x = c(x.ini, x.mir)
+    return(list(x = x, idx = (lnum + 1):(lnum + n)))
+  }
+}
+
 
 
 
