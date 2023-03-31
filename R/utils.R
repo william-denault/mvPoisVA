@@ -44,14 +44,95 @@ get_empirical_intensity <- function(x,indx_lst)
 }
 
 
-#alpha, lambda_tot
+compute_inverse_effect <- function(lp,lq, l_lambda){
 
-reverse_log_intensity <- function( ){
+
+
+
+  ## inverse function of get_empirical_intensity
+
+
+    J=log2(length(lp)+1)
+
+      log_lambda_tot <-l_lambda
+
+
+
+
+    out <- rep( log_lambda_tot , 2^J)
+
+    for(s in (J ):1){
+
+      nD = 2^(J-s+1)
+      nDo2 = nD/2
+      tt <-1
+      for(l in 0:(2^(s-1)-1)){
+        ind = (l*nD+1):((l+1)*nD) # all "sub index for coef s,l (here s=D)
+
+        print(ind)
+        ind_l <-  ind[1:nDo2] #all "sub index in the left for coef s,l (here s=D)
+        ind_r <-  ind[(nDo2+1):nD] # all "sub index in the right for coef s,l (here s=D)
+        out[ind_l] <- out[ind_l]+ lp[indx_lst[[(s )]][tt]]
+        out[ind_r] <- out[ind_r]+ lq[indx_lst[[(s )]][tt]]
+        tt <- tt+1
+      }
+    }
+    return( )
+
 
 }
 
 
+## inverse function of get_empirical_intensity
 
+reverse_intensity_transform =function(vec_int, indx_lst,
+                                      is.logprob=TRUE,
+                                      is.prob=FALSE,
+                                      is.log_int=TRUE){
+
+  J=log2(length(vec_int))
+
+  if( is.prob){
+    lp <- log(vec_int[- length(vec_int)])
+    lq = log(1-pmin(exp(lp),1-1e-10))
+  }
+  if(is.logprob){
+
+    lp <-  (vec_int[- length(vec_int)])
+    lq =   log(1-pmin( exp(lp),1-1e-10))
+  }
+  if( is.log_int){
+    log_lambda_tot <- vec_int[  length(vec_int)]
+  }else{
+    print( "assuming input is total intensity ")
+    log_lambda_tot <- log(vec_int[  length(vec_int)])
+  }
+
+
+
+  out <- rep( log_lambda_tot , 2^J)
+
+  for(s in (J ):1){
+
+    nD = 2^(J-s+1)
+    nDo2 = nD/2
+    tt <-1
+    for(l in 0:(2^(s-1)-1)){
+      ind = (l*nD+1):((l+1)*nD) # all "sub index for coef s,l (here s=D)
+
+      print(ind)
+      ind_l <-  ind[1:nDo2] #all "sub index in the left for coef s,l (here s=D)
+      ind_r <-  ind[(nDo2+1):nD] # all "sub index in the right for coef s,l (here s=D)
+      out[ind_l] <- out[ind_l]+ lp[indx_lst[[(s )]][tt]]
+      out[ind_r] <- out[ind_r]+ lq[indx_lst[[(s )]][tt]]
+      tt <- tt+1
+    }
+  }
+  return(exp(out))
+
+}
+
+#alpha, lambda_tot
 
 
 
@@ -124,6 +205,81 @@ get_post_log_int <- function(Mu_pm,
 
 
 
+# compute the individual fitted inhomogeneous Poisson process
+#In put is a matrix of posterior mean of logit of fitted probability
+# for each binomial regression, the last column corresponds to
+#the log intensity of the overall process
+get_ind_fitted_Poisproc <- function(post_mat,indx_lst ){
+
+  fitted_log_prob <- log(sigmoid(post_mat [ ,-ncol(post_mat )]))
+  fitted_log_int  <- post_mat [ ,  ncol(post_mat )]
+  fitted_Pois     <- cbind(fitted_log_prob,fitted_log_int)
+
+  fitted_Pois <- lapply(1:nrow( fitted_Pois),
+                        function( i)
+                          reverse_intensity_transform(vec_int  = fitted_Pois[i,],
+                                                      indx_lst = indx_lst,
+                                                      is.logprob=TRUE,
+                                                      is.log_int =TRUE) )
+  fitted_Pois <- do.call(rbind,fitted_Pois)
+  return( fitted_Pois)
+}
+
+get_fitted_Poisproc <-function( EBmvFR.obj,c_mean,indx_lst){
+
+  fitted_log_prob   <- log(sigmoid( EBmvFR.obj$fitted_wc[[1]] [ ,-ncol(EBmvFR.obj$fitted_wc[[1]]  )]))
+  fitted_log_int    <-EBmvFR.obj$fitted_wc[[1]] [ ,  ncol(EBmvFR.obj$fitted_wc[[1]]  )]
+  fitted_effect     <- cbind(fitted_log_prob,fitted_log_int)
+  fitted_effect     <- fitted_effect+ matrix(c_mean,
+                                             byrow = TRUE,
+                                             nrow=nrow(fitted_effect),
+                                             ncol=ncol(fitted_effect)
+  )
+
+  fitted_effect <- lapply(1:nrow( fitted_effect),
+                          function( i)
+                            reverse_intensity_transform(vec_int  = fitted_effect[i,],
+                                                        indx_lst = indx_lst,
+                                                        is.logprob=TRUE,
+                                                        is.log_int =TRUE) )
+  fitted_effect <- do.call(rbind,fitted_effect)
+  return( fitted_Pois)
+}
+
+
+
+extend_vec  <- function (x)
+{
+  n = length(x)
+  J = log2(n)
+  if ((J%%1) == 0) {
+    x = c(x, x[n:1])
+    return(list(x = x, idx = 1:n))
+  }  else {
+    n.ext = 2^ceiling(J)
+    lnum = round((n.ext - n)/2)
+    rnum = n.ext - n - lnum
+    if (lnum == 0) {
+      x.lmir = NULL
+    }    else {
+      x.lmir = x[lnum:1]
+    }
+    if (rnum == 0) {
+      x.rmir = NULL
+    }    else {
+      x.rmir = x[n:(n - rnum + 1)]
+    }
+
+
+    x =  c(x.lmir, x, x.rmir)
+    return(list(x = x, idx = (lnum + 1):(lnum + n)))
+  }
+}
+
+
+
+
+
 #### From other package -----
 
 
@@ -166,83 +322,7 @@ log1pexp = function (x){
 
 
 
-reflect_vec <- function (x)
-{
-  n = length(x)
-  J = log2(n)
-  if ((J%%1) == 0) {
-    x = c(x, x[n:1])
-    return(list(x = x, idx = 1:n))
-  }
-  else {
-    n.ext = 2^ceiling(J)
-    lnum = round((n.ext - n)/2)
-    rnum = n.ext - n - lnum
-    if (lnum == 0) {
-      x.lmir = NULL
-    }
-    else {
-      x.lmir = x[lnum:1]
-    }
-    if (rnum == 0) {
-      x.rmir = NULL
-    }
-    else {
-      x.rmir = x[n:(n - rnum + 1)]
-    }
-    x.ini = c(x.lmir, x, x.rmir)
-    x.mir = x.ini[n.ext:1]
-    x = c(x.ini, x.mir)
-    return(list(x = x, idx = (lnum + 1):(lnum + n)))
-  }
-}
 
-
-
-## inverse function of get_empirical_intensity
-
-reverse_intensity_transform =function(vec_int, indx_lst,is.logprob=TRUE, is.prob=FALSE, is.log_int=TRUE ){
-
-  J=log2(length(vec_int))
-
-  if( is.prob){
-    lp <- log(vec_int[- length(vec_int)])
-    lq = log(1-pmin(exp(lp),1-1e-10))
-  }
-  if(is.logprob){
-
-    lp <-  (vec_int[- length(vec_int)])
-    lq =   log(1-pmin( exp(lp),1-1e-10))
-  }
-  if( is.log_int){
-   log_lambda_tot <- vec_int[  length(vec_int)]
-  }else{
-    print( "assuming input is total intensity ")
-    log_lambda_tot <- log(vec_int[  length(vec_int)])
-   }
-
-
-
-  out <- rep( log_lambda_tot , 2^J)
-
-  for(s in (J ):1){
-
-    nD = 2^(J-s+1)
-    nDo2 = nD/2
-    tt <-1
-    for(l in 0:(2^(s-1)-1)){
-      ind = (l*nD+1):((l+1)*nD) # all "sub index for coef s,l (here s=D)
-      # print(ind)
-      ind_l <-  ind[1:nDo2] #all "sub index in the left for coef s,l (here s=D)
-      ind_r <-  ind[(nDo2+1):nD] # all "sub index in the right for coef s,l (here s=D)
-      out[ind_l] <- out[ind_l]+ lp[indx_lst[[(s )]][tt]]
-      out[ind_r] <- out[ind_r]+ lq[indx_lst[[(s )]][tt]]
-      tt <- tt+1
-    }
-  }
-  return(exp(out))
-
-}
 
 
 

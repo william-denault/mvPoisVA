@@ -62,7 +62,7 @@ X <- G
 
 
 
-reflect =FALSE
+extend =FALSE
 verbose=TRUE
 n_gh = 10
 
@@ -97,9 +97,9 @@ gh_points = fastGHQuad::gaussHermiteData(n_gh)
 
 
 ### dealing with non 2^S data ----
-J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
-if(reflect){
-  tl <- lapply(1:nrow(Y), function(i) reflect_vec(Y[i,]))
+J = log2(ncol(Y)); if((J%%1) != 0) extend=TRUE
+if(extend){
+  tl <- lapply(1:nrow(Y), function(i) extend_vec(Y[i,]))
   Y <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$x))
   idx_out <- tl[[1]]$idx #### indx of interest at the end
 }
@@ -117,6 +117,7 @@ tl <-  lapply(1:nrow(Y), function(i)
 ### Cal Ymin Ytot -----
 Y_min <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$Y_min))
 Y_tot <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$Y_tot))
+Y_plus <- Y_tot -Y_min
 rm(tl)
 
 if(verbose){
@@ -205,16 +206,51 @@ while( check >tol & iter <5){
   if(verbose){
     print( paste('Posterior of regression coefficient computed for iter ',iter))
   }
-  b_pm <-   X%*%EBmvFR.obj$fitted_wc[[1]]+ colMeans(Mu_pm, na.rm = TRUE)
+  b_pm <-   X%*%EBmvFR.obj$fitted_wc[[1]]+ matrix( colMeans(Mu_pm, na.rm = TRUE), byrow = TRUE,
+                                                   nrow=nrow(X), ncol=ncol(Y))
   l_bpm[[iter]] =b_pm
   iter=iter+1
   ##include mr.ash
 }
 
 
-fitted_proc <- lapply(1:nrow( b_pm ),
-                      function( i) reverse_intensity_transform(vec_int = b_pm[i,],
-                                                             indx_lst = indx_lst) )
+
+fitted_ind_Pois <- get_ind_fitted_Poisproc(post_mat = post_mat$A_pm, indx_lst = indx_lst)
+
+plot( fitted_ind_Pois[9,])
+lines(Y[9,])
+
+c_mean <- colMeans(Mu_pm)
+get_fitted_Poisproc <-function( EBmvFR.obj,c_mean,indx_lst){
+
+  fitted_log_prob   <- log(sigmoid( EBmvFR.obj$fitted_wc[[1]] [ ,-ncol(EBmvFR.obj$fitted_wc[[1]]  )]))
+  fitted_log_int    <-EBmvFR.obj$fitted_wc[[1]] [ ,  ncol(EBmvFR.obj$fitted_wc[[1]]  )]
+  fitted_effect     <- cbind(fitted_log_prob,fitted_log_int)
+  fitted_effect     <- fitted_effect#+ matrix(c_mean,
+  #        byrow = TRUE,
+  #        nrow=nrow(fitted_effect),
+  #                                           ncol=ncol(fitted_effect)
+  #                                          )
+##### PB HERE -----
+  fitted_effect <- lapply(1:nrow( fitted_effect),
+                          function( i)
+                            reverse_intensity_transform(vec_int  = fitted_effect[i,],
+                                                        indx_lst = indx_lst,
+                                                        is.logprob=TRUE,
+                                                        is.log_int =TRUE) )
+  fitted_effect <- do.call(rbind,fitted_effect)
+  return( fitted_Pois)
+}
+
+plot( fitted_effect[1,])
+lines(f1)
+
+plot( fitted_effect[5,])
+lines(f2)
+
+
+
+
 fitted_proc <- do.call(rbind,fitted_proc)
 
 fitted_effect <- lapply(1:nrow( EBmvFR.obj$fitted_wc[[1]] ),
@@ -222,3 +258,14 @@ fitted_effect <- lapply(1:nrow( EBmvFR.obj$fitted_wc[[1]] ),
                                                                 indx_lst = indx_lst) )
  fitted_effect <- do.call(rbind,fitted_effect)
 plot( fitted_effect[5,])
+
+col_Y_mean <-colMeans(Y)
+
+lines(f1)
+idx2 <- 256:130
+length(idx2)
+plot( fitted_effect[1, (idx2) ]   )
+lines(f1)
+which.max(f1
+          )
+which.max(fitted_effect[1, (idx2) ])
