@@ -11,8 +11,8 @@ P <- 10     #Number of covariates/SNP
 pos1 <- 1   #Position of the causal covariate for effect 1
 pos2 <- 7   #Position of the causal covariate for effect 2
 lev_res <- 7#length of the molecular phenotype (2^lev_res)
-f1 <- 0.5*sim_intenisty(lev_res )$sim_intens[-1]#first effect
-f2 <- 0.5*sim_intenisty(lev_res )$sim_intens[-1]#second effect
+f1 <- 0.1*sim_intenisty(lev_res )$sim_intens[-1]#first effect
+f2 <- 0.1*sim_intenisty(lev_res )$sim_intens[-1]#second effect
 
 f1 <- ifelse(f1>8, 8,f1)
 f2 <- ifelse(f2>8, 8,f2)

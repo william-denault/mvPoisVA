@@ -248,7 +248,9 @@ mv_Poisproc_reg <- function(Y,
                                                      1,
                                                      1/(susiF.obj$csd_X ), "*"),1,susiF.obj$alpha[[l]])))
 
-    }else{
+      susiF.obj$greedy  <- TRUE
+      susiF.obj$backfit <- TRUE
+      }else{
       fm_pm <-0* b_pm
       susiF.obj   <- NULL
     }
@@ -257,7 +259,9 @@ mv_Poisproc_reg <- function(Y,
     resid <- Mu_pm-fm_pm+b_pm
     #not correct to work on later
     sigma2_pois <- var(c(resid[,ncol(resid)]))
+    print(sigma2_pois)
     sigma2_bin  <- var(c(resid[,-ncol(resid)]))
+    print(sigma2_bin)
     Mu_pm <- fm_pm+b_pm#update
 
 
