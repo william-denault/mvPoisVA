@@ -108,6 +108,7 @@ mv_Poisproc_reg <- function(Y,
 
 
   iter <- 1
+  check <- 3*tol
   while( check >tol & iter <5){
 
     #### Check potential pb due to centering
