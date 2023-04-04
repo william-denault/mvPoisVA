@@ -82,7 +82,7 @@ mv_Poisproc_reg <- function(Y,
   rm(tl)
 
   ###initialization for functional reg object -----
-  lowc_wc <-   susiF.alpha::which_lowcount(Y_f=Y_min ,thresh_lowcount)
+  lowc_wc <-    which(apply(Y_min,2, var )<= thresh_lowcount)
 
   if(verbose){
     print("done transforming data")
