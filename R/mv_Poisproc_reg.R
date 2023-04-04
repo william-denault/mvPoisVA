@@ -15,7 +15,7 @@ mv_Poisproc_reg <- function(Y,
                             init_b_pm,
                             tol= 1e-3,
                             tol_vga_pois=1e-5,
-                            maxit=100,
+                            maxit=10,
                             control_mixsqp=  list(verbose=FALSE,
                                                   eps = 1e-6,
                                                   numiter.em = 4
@@ -81,9 +81,12 @@ mv_Poisproc_reg <- function(Y,
   Y_tot <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$Y_tot))
   rm(tl)
 
-  ###initialization for functional reg object -----
-  lowc_wc <-    which(apply(Y_min,2, var )<= thresh_lowcount)
-
+  if( length(which(apply(Y_min,2, var )<= thresh_lowcount))==0)
+  {
+    lowc_wc <-NULL
+  }else{
+    lowc_wc <- which(apply(Y_min,2, var )<= thresh_lowcount)
+  }
   if(verbose){
     print("done transforming data")
   }
@@ -109,7 +112,7 @@ mv_Poisproc_reg <- function(Y,
 
   iter <- 1
   check <- 3*tol
-  while( check >tol & iter <5){
+  while( check >tol & iter < maxit){
 
     #### Check potential pb due to centering
     post_mat <- get_post_log_int(Mu_pm       = Mu_pm,
