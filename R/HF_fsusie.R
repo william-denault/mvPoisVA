@@ -275,7 +275,12 @@ HF_susiF <- function(Y, X, Z, L = 2,
   indx_lst <-  gen_wavelet_indx(log2(ncol(Y_f)))
   #removing wc with variance 0 or below a certain level
 
-  lowc_wc <-   which_lowcount(Y_f,thresh_lowcount)
+  if( length(which(apply( Y_f ,2, var )<= thresh_lowcount))==0)
+  {
+    lowc_wc <-NULL
+  }else{
+    lowc_wc <- which(apply( Y_f ,2, var )<= thresh_lowcount)
+  }
   if(verbose){
     print( paste("Discarding ", length(lowc_wc), "wavelet coefficients out of ", ncol(Y_f)))
   }
