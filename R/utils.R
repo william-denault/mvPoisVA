@@ -1,4 +1,15 @@
 
+HFT<- function(count.data){
+    lst <- list()
+  for ( i in 1:nrow(count.data)){
+    lst[[i]] <-haarfisz::hft(count.data[i,])
+  }
+   out <- do.call( rbind,lst)
+   return(out)
+}
+
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
 
 #' @param x a vector of count of length of 2^S
 #' @param indx_list a list generated susiF.alpha::gen_wavelet_indx

@@ -156,7 +156,7 @@ mv_Poisproc_reg <- function(Y,
         #Recycled for the first step of the while loop
         EBmvFR.obj   <-  susiF.alpha::init_EBmvFR_obj(G_prior = G_prior,
                                                       Y       = Y,
-                                                      X       = X
+                                                      X       = Z
         )
         print('Done initializing EBmvFR.obj')
       }
