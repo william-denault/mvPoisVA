@@ -228,7 +228,7 @@ vga_binom_obj = function(theta,x,nb,beta,sigma2,n,gh_points){
 vga_binom_obj_grad = function(theta,x,nb,beta,sigma2,n,gh_points){
   m = theta[1:n]
   lv = theta[(n+1):(2*n)]
-  dm = - (x - nb*Elog1pexp_dm(m,exp(lv),gh_points) - (m-m*beta)/sigma2)
+  dm = - (x - nb*Elog1pexp_dm(m,exp(lv),gh_points) - (m-beta)/sigma2)
   dlv = - (- nb*Elog1pexp_dlv(m,lv,gh_points) - exp(lv)/2/sigma2 + 1/2)
   return(c(dm,dlv))
 }

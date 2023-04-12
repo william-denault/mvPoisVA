@@ -72,3 +72,6 @@ out_susiF$cs
 
 out_mvpois <- mv_Poisproc_reg(Y=Y,X=X,  L=10)
 out_mvpois$cs
+
+out_susiF <- HF_susiF(Y=Y,X=X, L=10)
+out_susiF$cs
