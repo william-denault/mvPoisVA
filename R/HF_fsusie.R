@@ -189,7 +189,8 @@ HF_susiF <- function(Y, X, Z, L = 2,
                   gridmult= sqrt(2),
                   max_scale=10,
                   parallel=FALSE,
-                  reflect=FALSE
+                  reflect=FALSE,
+                  max_SNP_EM=100
 )
 {
 
@@ -313,7 +314,8 @@ HF_susiF <- function(Y, X, Z, L = 2,
                                      lowc_wc        = lowc_wc,
                                      control_mixsqp = control_mixsqp,
                                      nullweight     = nullweight ,
-                                     gridmult       = gridmult )
+                                     gridmult       = gridmult ,
+                                     max_SNP_EM     = max_SNP_EM)
     G_prior     <- temp$G_prior
 
 
@@ -325,7 +327,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
     print('Done initializing EBmvFR.obj')
   }
   if(fit_approach %in%c("both","fine_mapping")){
-    temp <- susiF.alpha:: init_prior(Y              = Y_f,
+    temp <- susiF.alpha::init_prior(Y              = Y_f,
                                      X              = X ,
                                      prior          = prior ,
                                      v1             = v1,
@@ -333,7 +335,9 @@ HF_susiF <- function(Y, X, Z, L = 2,
                                      lowc_wc        = lowc_wc,
                                      control_mixsqp = control_mixsqp,
                                      nullweight     = nullweight ,
-                                     gridmult       = gridmult )
+                                     gridmult       = gridmult ,
+                                     max_SNP_EM     = max_SNP_EM
+                                     )
     G_prior     <- temp$G_prior
 
 
@@ -349,7 +353,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
     print('Done initializing susiF.obj')
 
   }
-
+print(fit_approach)
 
   if(verbose){
     print("Data transform done")
@@ -406,7 +410,8 @@ HF_susiF <- function(Y, X, Z, L = 2,
                                    min.purity     = min.purity,
                                    maxit          = maxit,
                                    tt             = tt,
-                                   parallel       = parallel)
+                                   parallel       = parallel,
+                                   max_SNP_EM     = max_SNP_EM)
 
   #preparing output
   susiF.obj <- out_prep_HF_fsusie(susiF.obj   = susiF.obj
