@@ -190,7 +190,8 @@ HF_susiF <- function(Y, X, Z, L = 2,
                   max_scale=10,
                   parallel=FALSE,
                   reflect=FALSE,
-                  max_SNP_EM=100
+                  max_SNP_EM=100,
+                  max_step_EM= 1
 )
 {
 
@@ -315,6 +316,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
                                      control_mixsqp = control_mixsqp,
                                      nullweight     = nullweight ,
                                      gridmult       = gridmult ,
+                                     max_SNP_EM     = max_SNP_EM,
                                      max_SNP_EM     = max_SNP_EM)
     G_prior     <- temp$G_prior
 
@@ -327,7 +329,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
     print('Done initializing EBmvFR.obj')
   }
   if(fit_approach %in%c("both","fine_mapping")){
-    temp <- susiF.alpha::init_prior(Y              = Y_f,
+    temp <- susiF.alpha::init_prior( Y               = Y_f,
                                      X              = X ,
                                      prior          = prior ,
                                      v1             = v1,
@@ -336,7 +338,8 @@ HF_susiF <- function(Y, X, Z, L = 2,
                                      control_mixsqp = control_mixsqp,
                                      nullweight     = nullweight ,
                                      gridmult       = gridmult ,
-                                     max_SNP_EM     = max_SNP_EM
+                                     max_SNP_EM     = max_SNP_EM,
+                                     max_step_EM    = max_step_EM
                                      )
     G_prior     <- temp$G_prior
 
@@ -387,7 +390,8 @@ print(fit_approach)
                                                   nullweight     = nullweight.mrash,
                                                   cal_obj        = cal_obj.mrash,
                                                   verbose        = verbose.mrash,
-                                                  maxit          = maxit.mrash
+                                                  maxit          = maxit.mrash,
+                                                  max_step_EM    = max_step_EM
     )
 
      Y_f <-Y_f - Z%*%  EBmvFR.obj$fitted_wc[[1]]
@@ -411,7 +415,8 @@ print(fit_approach)
                                    maxit          = maxit,
                                    tt             = tt,
                                    parallel       = parallel,
-                                   max_SNP_EM     = max_SNP_EM)
+                                   max_SNP_EM     = max_SNP_EM,
+                                   max_step_EM    = max_step_EM)
 
   #preparing output
   susiF.obj <- out_prep_HF_fsusie(susiF.obj   = susiF.obj

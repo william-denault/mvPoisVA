@@ -93,6 +93,7 @@ for( o in 1:2000){
   m2$cs
   m1 <- susiF   (Y=Y, X=G,L=20,L_start=11 ,nullweight=10  )
   m1$cs
+  m3 <- mv_Poisproc_reg(Y=Y, X=G,L=20,L_start=11 ,nullweight=10 , maxit=10  , verbose=FALSE)
 
 
 
@@ -114,6 +115,17 @@ for( o in 1:2000){
             ),#number of CS without any effect
             cal_purity(m2$cs, X=as.matrix(G)),#mean purity
             mean(sapply( m2$cs, length)), #CS size
+
+
+
+            length(m3$cs),
+            length(which(true_pos%in% do.call(c, m3$cs))),
+            Reduce("+",sapply(1:length(m3$cs), function(k)
+              ifelse( length(which(true_pos%in%m3$cs[[k]] ))==0, 1,0)
+            )
+            ),#number of CS without any effect
+            cal_purity(m3$cs, X=as.matrix(G)),#mean purity
+            mean(sapply( m3$cs, length)), #CS size
 
             L,tt)
   res[[o]] <-unlist(out)

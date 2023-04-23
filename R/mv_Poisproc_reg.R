@@ -35,7 +35,8 @@ mv_Poisproc_reg <- function(Y,
                             cal_obj.mrash=FALSE,
                             maxit.fsusie=50,
                             cal_obj.fsusie=FALSE,
-                            max_SNP_EM     = 100
+                            max_SNP_EM     = 100,
+                            max_step_EM    = 1
 )
 {
   ####Changer les calcul d'objective -----
@@ -151,7 +152,8 @@ mv_Poisproc_reg <- function(Y,
                                          control_mixsqp = control_mixsqp,
                                          nullweight     = nullweight.mrash,
                                          gridmult       = gridmult,
-                                         max_SNP_EM     = max_SNP_EM )
+                                         max_SNP_EM     = max_SNP_EM ,
+                                         max_step_EM    = max_step_EM )
         G_prior     <- temp$G_prior
 
 
@@ -172,7 +174,8 @@ mv_Poisproc_reg <- function(Y,
                                          control_mixsqp = control_mixsqp,
                                          nullweight     = nullweight.mrash,
                                          gridmult       = gridmult,
-                                         max_SNP_EM     = max_SNP_EM)
+                                         max_SNP_EM     = max_SNP_EM,
+                                         max_step_EM    = max_step_EM )
         G_prior     <- temp$G_prior
 
 
@@ -206,7 +209,8 @@ mv_Poisproc_reg <- function(Y,
                                                     cal_obj        = cal_obj.mrash,
                                                     verbose        = verbose.mrash,
                                                     maxit          = maxit.mrash,
-                                                    max_SNP_EM     = max_SNP_EM
+                                                    max_SNP_EM     = max_SNP_EM,
+                                                    max_step_EM    = max_step_EM
       )
       if(verbose){
         print( paste('Posterior of EB regression coefficient computed for iter ',iter))
@@ -246,7 +250,8 @@ mv_Poisproc_reg <- function(Y,
                                        min.purity     = min.purity,
                                        maxit          = maxit.fsusie,
                                        tt             = temp$tt,
-                                       max_SNP_EM     = max_SNP_EM)
+                                       max_SNP_EM     = max_SNP_EM,
+                                       max_step_EM    = max_step_EM )
 
 
 
