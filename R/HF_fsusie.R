@@ -191,7 +191,8 @@ HF_susiF <- function(Y, X, Z, L = 2,
                   parallel=FALSE,
                   reflect=FALSE,
                   max_SNP_EM=100,
-                  max_step_EM= 1
+                  max_step_EM= 1,
+                  cor_small= FALSE
 )
 {
 
@@ -416,7 +417,9 @@ print(fit_approach)
                                    tt             = tt,
                                    parallel       = parallel,
                                    max_SNP_EM     = max_SNP_EM,
-                                   max_step_EM    = max_step_EM)
+                                   max_step_EM    = max_step_EM,
+
+                                   cor_small= cor_small)
 
   #preparing output
   susiF.obj <- out_prep_HF_fsusie(susiF.obj   = susiF.obj

@@ -192,7 +192,7 @@ get_post_log_int <- function(Mu_pm,
 
   opt_Poisson  <- vga_pois_solver(init_val = init_val_pois ,
                                   x        = Y_min[,ncol(Y_min)],
-                                  s        = rep( 1, nrow(Y)),
+                                  s        = rep( 1, nrow(Y_min)),
                                   beta     = beta_pois,
                                   sigma2   = sigma2_pois,
                                   maxiter  = 10,

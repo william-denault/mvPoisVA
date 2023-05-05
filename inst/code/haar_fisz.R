@@ -7,7 +7,7 @@ init=TRUE
 set.seed(1)
 #Example using curves simulated under the Mixture normal per scale prior
 check=1
-N <- 200    #Number of individuals
+N <- 20    #Number of individuals
 P <- 10     #Number of covariates/SNP
 pos1 <- 1   #Position of the causal covariate for effect 1
 pos2 <- 7   #Position of the causal covariate for effect 2
@@ -56,4 +56,7 @@ for ( i in 1:nrow(count.data)){
 plot( inv_lst[[1]], count.data[1,])
 
 
-HF_susiF (Y=count.data, X=G)
+res_HF <- HF_susiF (Y=count.data, X=G)
+lol1 <- mv_Poisproc_reg(Y=count.data, X=G)
+lol1
+res_HF

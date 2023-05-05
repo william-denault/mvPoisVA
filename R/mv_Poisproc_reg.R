@@ -36,7 +36,8 @@ mv_Poisproc_reg <- function(Y,
                             maxit.fsusie=50,
                             cal_obj.fsusie=FALSE,
                             max_SNP_EM     = 100,
-                            max_step_EM    = 1
+                            max_step_EM    = 1,
+                            cor_small=FALSE
 )
 {
   ####Changer les calcul d'objective -----
@@ -65,9 +66,6 @@ mv_Poisproc_reg <- function(Y,
     Y <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$x))
     idx_out <- tl[[1]]$idx #### indx of interest at the end
   }
-
-
-
   #### to avoid 0 in Y_min to correct at the end
   Y <- Y+1
 
@@ -106,6 +104,7 @@ mv_Poisproc_reg <- function(Y,
     }
     sigma2_bin  = 1
     sigma2_pois = 1
+
   }
 
 
@@ -126,6 +125,8 @@ mv_Poisproc_reg <- function(Y,
                                  b_pm        = b_pm,
                                  gh_points   = gh_points,
                                  tol         = tol_vga_pois)
+
+
     if(verbose){
       print( paste('Posterior log intensity computed for iter ',iter))
     }
@@ -251,7 +252,8 @@ mv_Poisproc_reg <- function(Y,
                                        maxit          = maxit.fsusie,
                                        tt             = temp$tt,
                                        max_SNP_EM     = max_SNP_EM,
-                                       max_step_EM    = max_step_EM )
+                                       max_step_EM    = max_step_EM ,
+                                       cor_small= cor_small)
 
 
 
@@ -290,6 +292,6 @@ mv_Poisproc_reg <- function(Y,
   out <- out_prep_mvpoisva( Mu_pm=Mu_pm,
                             susiF.obj=susiF.obj,
                             EBmvFR.obj=EBmvFR.obj)
-
+return(out)
 
 }
