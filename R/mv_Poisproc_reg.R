@@ -87,6 +87,11 @@ mv_Poisproc_reg <- function(Y,
   }else{
     lowc_wc <- which(apply(Y_min,2, var )<= thresh_lowcount)
   }
+
+
+
+
+
   if(verbose){
     print("done transforming data")
   }
@@ -229,12 +234,11 @@ mv_Poisproc_reg <- function(Y,
 
     ### fit fsusie -----
     if(fit_approach%in% c("both", "fine_mapping")){
-      tmp_Mu_pm <- Mu_pm -  b_pm#potentially run smash on colmean
+      tmp_Mu_pm <- Mu_pm -  b_pm + matrix(rnorm(prod(dim(Mu_pm)), sd=  1e-3), ncol= ncol(Mu_pm))#potentially run smash on colmean
       W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
 
-
-
+print(paste("lowc_wc equal ", lowc_wc))
       susiF.obj     <- susiF.workhorse(susiF.obj      = susiF.obj,
                                        W              = W,
                                        X              = X,
@@ -253,7 +257,9 @@ mv_Poisproc_reg <- function(Y,
                                        tt             = temp$tt,
                                        max_SNP_EM     = max_SNP_EM,
                                        max_step_EM    = max_step_EM ,
-                                       cor_small= cor_small)
+                                       cor_small      = cor_small,
+                                       is.pois        = TRUE)
+
 
 
 
@@ -281,7 +287,7 @@ mv_Poisproc_reg <- function(Y,
     Mu_pm <- fm_pm+b_pm#update
 
 
-
+    if(verbose){print( paste(   iter, " done"))}
     iter=iter+1
     ##include mr.ash
   }

@@ -239,6 +239,10 @@ HF_susiF <- function(Y, X, Z, L = 2,
 
 
 
+
+
+
+
   #reshaping of the data
   if ( !(length(pos)==dim(Y)[2])) #miss matching positions and number of observations
   {
@@ -256,6 +260,11 @@ HF_susiF <- function(Y, X, Z, L = 2,
     idx_out <- tl[[1]]$idx #### indx of interest at the end
   }
 
+
+  ## Checking if there not "too many null row in Y"
+  if( length(which(rowSums(Y)==0) ) > (nrow(Y)-4)){
+    stop('There less than 4 rows in the input matrix that are not equal to 0 ')
+  }
 
   Y    <- HFT(Y)
   W <- list(D= Y[,-ncol(Y)], C=Y[, ncol(Y)])
@@ -418,8 +427,8 @@ print(fit_approach)
                                    parallel       = parallel,
                                    max_SNP_EM     = max_SNP_EM,
                                    max_step_EM    = max_step_EM,
-
-                                   cor_small= cor_small)
+                                   cor_small      = cor_small,
+                                   is.pois        = TRUE)
 
   #preparing output
   susiF.obj <- out_prep_HF_fsusie(susiF.obj   = susiF.obj

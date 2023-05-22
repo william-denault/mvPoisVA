@@ -89,12 +89,12 @@ for( o in 1:2000){
 
 
   input <- list(Y=Y, X=G, true_pos=true_pos)
-  m2 <- HF_susiF(Y=Y, X=G,L=20,L_start=11 ,nullweight=10 )
+  m2 <- HF_susiF(Y=Y, X=G,L=20,L_start=11 ,nullweight=10, cor_small = TRUE )
   m2$cs
-  m1 <- susiF   (Y=Y, X=G,L=20,L_start=11 ,nullweight=10  )
+  m1 <- susiF   (Y=Y, X=G,L=20,L_start=11 ,nullweight=10 , cor_small = TRUE )
   m1$cs
-  m3 <- mv_Poisproc_reg(Y=Y, X=G,L=20,L_start=11 ,nullweight=10 , maxit=10  , verbose=FALSE)
-
+  m3 <- mv_Poisproc_reg(Y=Y, X=G,L=20,L_start=11 ,nullweight=10 , maxit=3 ,  verbose=FALSE)
+  m3$cs
 
 
   out <- c( length(m1$cs), #number of CS
