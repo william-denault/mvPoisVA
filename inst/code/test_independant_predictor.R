@@ -1,30 +1,14 @@
+rm(list=ls())
 library(susiF.alpha)
 library(sim1000G)
-examples_dir = system.file("examples", package = "sim1000G")
-vcf_file = file.path(examples_dir, "region.vcf.gz")
-
-vcf = readVCF( vcf_file , maxNumberOfVariants = 200000 , min_maf = 0.02 , max_maf = NA )
-
-# downloadGeneticMap( 4 )
-readGeneticMap( chromosome = 4)
-
-startSimulation( vcf )
-
+N <- 20
 
 
 '%!in%' <- function(x,y)!('%in%'(x,y))
-id = c()
-for(i in 1:100) id[i] = SIM$addUnrelatedIndividual()
-
-# Show haplotype 1  of first 5 individuals
-#print(SIM$gt1[1:5,1:6])
-
-# Show haplotype 2
-#print(SIM$gt1[1:5,1:6])
 
 
 
-genotypes = SIM$gt1[1:100,] + SIM$gt2[1:100,]
+genotypes = matrix(sample(c(0,1,2), size=(N*100), replace=TRUE), nrow=N)
 
 
 caca <- genotypes
@@ -32,15 +16,15 @@ print(dim(genotypes))
 
 str(genotypes)
 
-if(file.exists("D:/Document/Serieux/Travail/Package/mvPoisVA/inst/check_pois_fsusie.RData")){
-  load("D:/Document/Serieux/Travail/Package/mvPoisVA/inst/check_pois_fsusie.RData")
+if(file.exists("D:/Document/Serieux/Travail/Package/mvPoisVA/inst/check_pois_fsusie_indep.RData")){
+  load("D:/Document/Serieux/Travail/Package/mvPoisVA/inst/check_pois_fsusie_indep.RData")
 
 }else{
   res <-list()
 }
-pb_input <-list()
 
-N <- 50
+
+
 cal_purity <- function(l_cs,X){
   tt <- list()
   for (k in 1:length(l_cs)){
@@ -59,8 +43,10 @@ cal_purity <- function(l_cs,X){
 
 
 input_pb <- list()
-for( o in 1:2000){
-  L <- sample(1:20, size=1)#actual number of effect
+for( o in (length(res)+1):2000){
+
+
+   L <- sample(1:20, size=1)#actual number of effect
   lf <-  list()
   for(l in 1:L){
     lf[[l]] <- abs(simu_IBSS_per_level(lev_res=7)$sim_func) #functional effect for effect l
@@ -68,7 +54,7 @@ for( o in 1:2000){
 
 
   tt <- sample(0:4,1)
-  G <- genotypes[sample( 1:nrow(genotype), size=N, replace=FALSE),]
+  G <- genotypes[sample( 1:nrow(genotypes), size=N, replace=FALSE),]
 
   if( length(which(apply(G,2,var)==0))>0){
     G <- G[,-which(apply(G,2,var)==0)]
@@ -137,10 +123,10 @@ for( o in 1:2000){
                   out=out)
 
     pb_input [[length(pb_input)+1]] <- input
-    save(pb_input, file="D:/Document/Serieux/Travail/Package/mvPoisVA/inst/check_pb_pois_fsusie.R.RData")
+    save(pb_input, file="D:/Document/Serieux/Travail/Package/mvPoisVA/inst/check_pb_pois_fsusie_indep.R.RData")
   }
 
-  save(res, file="D:/Document/Serieux/Travail/Package/mvPoisVA/inst/check_pois_fsusie.RData")
+  save(res, file="D:/Document/Serieux/Travail/Package/mvPoisVA/inst/check_pois_fsusie_indep.RData")
 
 
 }

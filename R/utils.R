@@ -98,19 +98,18 @@ compute_inverse_effect <- function(lp,lq, l_lambda){
 
 reverse_intensity_transform =function(vec_int, indx_lst,
                                       is.logprob=TRUE,
-                                      is.prob=FALSE,
                                       is.log_int=TRUE){
 
   J=log2(length(vec_int))
 
-  if( is.prob){
-    lp <- log(vec_int[- length(vec_int)])
-    lq = log(1-pmin(exp(lp),1-1e-10))
-  }
+
   if(is.logprob){
 
     lp <-  (vec_int[- length(vec_int)])
     lq =   log(1-pmin( exp(lp),1-1e-10))
+  }else{
+    lp <- log(vec_int[- length(vec_int)])
+    lq = log(1-pmin(exp(lp),1-1e-10))
   }
   if( is.log_int){
     log_lambda_tot <- vec_int[  length(vec_int)]
@@ -369,11 +368,78 @@ reflect_vec <- function (x)
 
 
 
+cal_Bhat_Shat   <- function(Y,
+                            X ,
+                            v1 ,
+                            resid_var=1,
+                            lowc_wc=NULL,
+                            ind_analysis,  ...  )
+{
 
 
 
-#' Interleave two vectors.
-#' @keywords internal
-interleave=function(x,y){
-  return(as.vector(rbind(x,y)))
+  if(missing(ind_analysis)){
+
+
+    d <- colSums(X^2)
+    Bhat <- (t(X)%*%Y )/d
+
+    Shat  <- do.call( cbind,
+                      lapply( 1:ncol(Bhat),
+                              function(i) matrixStats::colSds(Y [,i] -sweep( X,2, Bhat[,i], "*"))
+                      )
+    )
+    Shat <- Shat/sqrt(nrow(Y))
+
+  }else{
+    if( is.list(ind_analysis) ){ #usefull for running multiple univariate regression with different problematic ind
+
+
+      Bhat <-  do.call(cbind,lapply(1:length(ind_analysis),
+                                    function(l){
+                                      d   <- colSums(X[ind_analysis[[l]], ]^2)
+                                      out <- (t(X[ind_analysis[[l]], ])%*%Y[ind_analysis[[l]], l])/d
+                                      return(out)
+                                    }
+
+
+      ) )
+
+
+      Shat  <-   matrix(mapply(function(l,j)
+        sqrt(fast_var(Y[ind_analysis[[l]],l] - X[ind_analysis[[l]], j]  *  Bhat[j,l]) /(length(ind_analysis[[l]])-1)),
+        l=rep(1:dim(Y)[2],each= ncol(X)),
+        j=rep(1:dim(X)[2], ncol(Y))
+      ),
+      ncol=dim(Y)[2]
+      )
+
+
+    }else{
+      d <- colSums(X[ind_analysis , ]^2)
+      Bhat <- (t(X[ind_analysis , ])%*%Y[ind_analysis , ])/d
+
+      Shat  <- do.call( cbind,
+                        lapply( 1:ncol(Bhat),
+                                function(i) matrixStats::colSds(Y [ind_analysis,i] -sweep( X[ind_analysis,],2, Bhat[ ,i], "*"))
+                        )
+      )
+      Shat <- Shat/sqrt(nrow(Y[ind_analysis,]))
+
+    }
+
+  }
+
+
+
+
+  if( !is.null(lowc_wc)){
+    Bhat[,lowc_wc] <- 0
+    Shat[,lowc_wc] <- 1
+  }
+  out  <- list( Bhat = Bhat,
+                Shat = Shat)
+
+  return(out)
+
 }

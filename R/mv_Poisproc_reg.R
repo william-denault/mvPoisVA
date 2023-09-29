@@ -69,6 +69,22 @@ mv_Poisproc_reg <- function(Y,
   #### to avoid 0 in Y_min to correct at the end
   Y <- Y+1
 
+  if(fit_approach %in% c('both',"fine_mapping")){
+    tidx <- which(apply(X,2,var)==0)
+    if( length(tidx)>0){
+      warning(paste("Some of the columns of X are constants, we removed" ,length(tidx), "columns"))
+      X <- X[,-tidx]
+    }
+    X <- susiF.alpha:::colScale(X)
+  }
+  if(fit_approach %in% c('both',"penalized")){
+    tidx <- which(apply(Z,2,var)==0)
+    if( length(tidx)>0){
+      warning(paste("Some of the columns of Z are constants, we removed" ,length(tidx), "columns"))
+      Z <- Z[,-tidx]
+    }
+    Z <- susiF.alpha:::colScale(Z)
+  }
 
   indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
 
@@ -113,7 +129,7 @@ mv_Poisproc_reg <- function(Y,
   }
 
 
-  X <- susiF.alpha:::colScale(X)
+
 
 
   iter <- 1

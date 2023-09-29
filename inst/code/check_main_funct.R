@@ -2,17 +2,20 @@ library(ashr)
 library(wavethresh)
 library(susiF.alpha)
 library(mvPoisVA)
+library(susieR)
+rm(list=ls())
+data(N3finemapping)
 init=TRUE
 set.seed(1)
 #Example using curves simulated under the Mixture normal per scale prior
 check=1
-N <- 20    #Number of individuals
-P <- 10     #Number of covariates/SNP
-pos1 <- 1   #Position of the causal covariate for effect 1
+N <- 50   #Number of individuals
+P <- 100     #Number of covariates/SNP
+pos1 <- 20   #Position of the causal covariate for effect 1
 pos2 <- 7   #Position of the causal covariate for effect 2
 lev_res <- 7#length of the molecular phenotype (2^lev_res)
-f1 <- sim_intenisty(lev_res )$sim_intens[-1]#first effect
-f2 <- sim_intenisty(lev_res )$sim_intens[-1]#second effect
+f1 <- 0.2*sim_intenisty(lev_res )$sim_intens[-1]#first effect
+f2 <- 0.2*sim_intenisty(lev_res )$sim_intens[-1]#second effect
 
 plot( f1, type ="l", ylab="effect", col="blue")
 abline(a=0,b=0)
@@ -23,15 +26,22 @@ legend(x=100,
        lty = rep(1,2),
        legend= c("effect 1", "effect 2" ),
        col=c( "blue","yellow"))
-G = matrix(sample(c(0, 1,2), size=N*P, replace=TRUE), nrow=N, ncol=P) #Genotype
+G = N3finemapping$X[1:N,1:P]#matrix(sample(c(0, 1,2), size=N*P, replace=TRUE), nrow=N, ncol=P) #Genotype
+ G <- G-2*min(G,na.rm = TRUE)
+#G =matrix(sample(c(0, 1,2), size=N*P, replace=TRUE), nrow=N, ncol=P) #Genotype
+
+
 beta0       <- 0
 beta1       <- 1
 beta2       <- 1
 count.data  <- list()
+#G <-   matrix(sample(c(0, 1,2), size=N*P, replace=TRUE), nrow=N, ncol=P) #Genotype
+
 
 for ( i in 1:N)
 {
   predictor <-beta1*G[i,pos1]*f1 + beta2*G[i,pos2]*f2
+
   count.data [[i]] <-   rpois(n= length(f1) ,
                               lambda =predictor  )
 
@@ -42,7 +52,7 @@ count.data <- do.call(rbind, count.data)
 
 
 plot( count.data[1,], type = "l", col=(G[1, pos1]*3+1),
-      main="Observed curves \n colored by the causal effect", ylim= c(-1,100), xlab="")
+      main="Observed curves \n colored by the causal effect",   xlab="")
 for ( i in 2:N)
 {
   lines( count.data[i,], type = "l", col=(G[i, pos1]*3+1))
@@ -102,7 +112,17 @@ fit_approach <- "both"
 nullweight.mrash=10
 
 init_pi0_w.mrash=10
-
+tidx <- which(apply(Z,2,var)==0)
+if( length(tidx)>0){
+  warning(paste("Some of the columns of Z are constants, we removed" ,length(tidx), "columns"))
+  Z <- Z[,-tidx]
+}
+Z <- susiF.alpha:::colScale(Z)
+tidx <- which(apply(X,2,var)==0)
+if( length(tidx)>0){
+  warning(paste("Some of the columns of Z are constants, we removed" ,length(tidx), "columns"))
+  X <- X[,-tidx]
+}
 X <- susiF.alpha:::colScale(X)
 gh_points = fastGHQuad::gaussHermiteData(n_gh)
 
@@ -152,12 +172,12 @@ if(init){
   Mu_pv = 1/Y_tot
 
     b_pm <- 0*Y
-
+    fm_pm <-0*Y
   sigma2_bin  = 1
   sigma2_pois = 1
 }
 
-
+iter=1
 while( check >tol & iter <10){
 
   #### Check potential pb due to centering
@@ -173,11 +193,18 @@ while( check >tol & iter <10){
   if(verbose){
     print( paste('Posterior log intensity computed for iter ',iter))
   }
+
+  plot(post_mat$A_pm, Mu_pm)
+
+  abline(a=0,b=1)
+
+  plot(post_mat$A_pv, Mu_pv)
+  abline(a=0,b=1)
   Mu_pm <- post_mat$A_pm
+
   Mu_pv <- post_mat$A_pv
 
-
-  tmp_Mu_pm <- Mu_pm -  apply(Mu_pm, 2, median)#potentially run smash on colmean
+  tmp_Mu_pm <- susiF.alpha::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
   W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
              C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
 
@@ -202,7 +229,7 @@ while( check >tol & iter <10){
       #Recycled for the first step of the while loop
       EBmvFR.obj   <-  susiF.alpha::init_EBmvFR_obj(G_prior = G_prior,
                                                     Y       = Y,
-                                                    X       = X
+                                                    X       = Z
       )
       print('Done initializing EBmvFR.obj')
     }
@@ -236,6 +263,14 @@ while( check >tol & iter <10){
   }
   #### fit EBmvFR ----
   if(fit_approach%in% c("both", "penalized")){
+    tmp_Mu_pm_pen <- Mu_pm  -  fm_pm#potentially run smash on colmean
+
+
+    tmp_Mu_pm_pen <- susiF.alpha::colScale(tmp_Mu_pm_pen, scale=FALSE)
+    W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_pen )],
+               C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_pen )])
+
+
     ### TODO: Maybe use better restarting point for EBmvFR.obj
     EBmvFR.obj   <- susiF.alpha::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
                                                   W              = W,
@@ -248,26 +283,27 @@ while( check >tol & iter <10){
                                                   nullweight     = nullweight.mrash,
                                                   cal_obj        = cal_obj.mrash,
                                                   verbose        = FALSE,
-                                                  maxit          = maxit.mrash
+                                                  maxit          = maxit.mrash,
+                                                  max_step_EM =1
     )
     if(verbose){
       print( paste('Posterior of EB regression coefficient computed for iter ',iter))
     }
-    b_pm <-   Z%*%  EBmvFR.obj$fitted_wc[[1]]    +  matrix( apply(Mu_pm, 2, median), byrow = TRUE,
-                                                            nrow=nrow(X), ncol=ncol(Y))
+    b_pm <-   Z%*%  EBmvFR.obj$fitted_wc[[1]]
 
 
 
   }else{
-    b_pm <- matrix( apply(Mu_pm, 2, median), byrow = TRUE,
-                    nrow=nrow(X), ncol=ncol(Y))
+    b_pm <- 0* tmp_Mu_pm_pen
 
   }
 
   if(fit_approach%in% c("both", "fine_mapping")){
-    tmp_Mu_pm <- Mu_pm -  b_pm#potentially run smash on colmean
-    W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
-               C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
+    tmp_Mu_pm_fm <- Mu_pm -  b_pm#potentially run smash on colmean
+
+    tmp_Mu_pm_fm <- susiF.alpha::colScale(tmp_Mu_pm_fm, scale=FALSE)
+    W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_fm )],
+               C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
 
 
 
@@ -286,7 +322,8 @@ while( check >tol & iter <10){
                                      cov_lev        = cov_lev,
                                      min.purity     = min.purity,
                                      maxit          = maxit.fsusie,
-                                     tt             = temp$tt)
+                                     tt             = temp$tt,
+                                     cor_small = TRUE)
 
 
 
@@ -297,24 +334,38 @@ while( check >tol & iter <10){
                                                    1,
                                                    1/(susiF.obj$csd_X ), "*"),1,susiF.obj$alpha[[l]])))
 
+
   }else{
-    fm_pm <-0* b_pm
+    fm_pm <-0* tmp_Mu_pm_fm
     susiF.obj   <- NULL
   }
 
 
-  resid <- Mu_pm-fm_pm+b_pm
+  resid <- Mu_pm-fm_pm-b_pm
   #not correct to work on later
   sigma2_pois <- var(c(resid[,ncol(resid)]))
   print(sigma2_pois)
   sigma2_bin  <- var(c(resid[,-ncol(resid)]))
   print(sigma2_bin)
-  Mu_pm <- fm_pm+b_pm#update
+  Mu_pm <- matrix(apply(Mu_pm,2, mean), byrow = TRUE,
+                  nrow=nrow(X), ncol=ncol(Y))+fm_pm+b_pm#update
 
-
+  print(
+    susiF.obj$cs)
   iter=iter+1
   ##include mr.ash
 }
+tidx
+susiF.obj$cs
+lol <- susiF(Y=Y,X,L=3,cor_small = TRUE)
+lol$cs
+tt <- reverse_intensity_transform (vec_int = c(log( sigmoid(  Mu_pm[1,-ncol( Mu_pm)])),  Mu_pm[1,ncol( Mu_pm)]) ,
+                                   indx_lst = indx_lst,
+                                   is.logprob=TRUE,
+                                   is.log_int =TRUE)
+plot(tt)
+lines(tt, col="green")
+points( Y[1,], col="blue")
 
+plot( Y[1,])
 
-out <- prec

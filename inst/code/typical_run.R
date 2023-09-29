@@ -201,7 +201,8 @@ while( check >tol & iter <5){
                                                 nullweight     = nullweight.mrash,
                                                 cal_obj        = cal_obj.mrash,
                                                 verbose        = verbose.mrash,
-                                                maxit          = maxit.mrash
+                                                maxit          = maxit.mrash,
+                                                max_step_EM = 1
                                                 )
   if(verbose){
     print( paste('Posterior of regression coefficient computed for iter ',iter))

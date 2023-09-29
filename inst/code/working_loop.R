@@ -66,13 +66,13 @@ sum(is.na(Y_min))
 #deal with case exactly one or exactly 0
 
 Mu_pm = logit((Y_min/Y_tot) ) #remove last column contain C coeff
-Mu_pm[Mu_pm==-Inf] =  logit(0.1)
-Mu_pm[Mu_pm==Inf]  =  logit(0.9)
+Mu_pm[Mu_pm==-Inf] =  logit(0.0001)
+Mu_pm[Mu_pm==Inf]  =  logit(0.9999)
 
 Mu_pm[,ncol(Y_min)] <- log(Y_min[,ncol(Y_min)])
 Mu_pv = 1/Y_tot
-  Mu_pm[Mu_pm==-Inf] =  logit(0.1)
-  Mu_pm[Mu_pm==Inf] =  logit(0.9)
+  Mu_pm[Mu_pm==-Inf] = logit(0.0001)
+  Mu_pm[Mu_pm==Inf] =  logit(0.9999)
 
 
 
@@ -110,6 +110,9 @@ Mu_pv = 1/Y_tot
 
   A_pv <- cbind(matrix(opt_binomial$v, ncol = (ncol(Y_min)-1)), opt_Poisson$v) # we are missing C column
   plot( Mu_pm[1,], A_pm[1,])
+  abline(a=0,b=1)
+
+  plot( Mu_pm , A_pm )
   abline(a=0,b=1)
 
 

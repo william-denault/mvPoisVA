@@ -128,8 +128,9 @@ emp_log_lambda_tot <- log(emp_lambda_tot )
 
 
 
-emp_log_prop <- log(sigmoid(EBmvFR.obj$fitted_wc[[1]][5,-256]))
-emp_log_lambda_tot <-8# EBmvFR.obj$fitted_wc[[1]][5, 256]
+
+
+
 
 lp <- emp_log_prop
 lq = log(1-pmin(exp(lp),1-1e-10))# complementary prop
@@ -168,7 +169,8 @@ lines(Y_org[1,])
 tt <- reverse_intensity_transform(vec_int = c(emp_prop[-length(emp_prop)] ,
                                               emp_lambda_tot),
                                   indx_lst = indx_lst,
-                                  is.prob =TRUE,
+
+                                  is.logprob = FALSE,
                                   is.log_int = FALSE)
 
 plot( tt)

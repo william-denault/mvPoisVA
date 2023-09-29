@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
 Depends:
   R (>= 3.1.0),
   fastGHQuad,
-  susiF.alpha (>= 0.1.215),
+  susiF.alpha (>= 0.1.218),
   haarfisz
 License: MIT
 Encoding: UTF-8
