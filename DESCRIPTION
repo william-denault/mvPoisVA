@@ -1,11 +1,10 @@
 Package: mvPoisVA
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.1.002
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Title: Regression methods for inhomogeneous Poisson processes
+Version: 0.1.1.003
+Author: William R.P. Denault
+Maintainer:   <wdenault@uchicago.edu>
+Description: Implementation of SuSiE and Empirical Bayes penalized regression methods for inhomogeneous Poisson processes
 Depends:
   R (>= 3.1.0),
   fastGHQuad,
