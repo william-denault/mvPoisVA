@@ -8,7 +8,7 @@ Description: Implementation of SuSiE and Empirical Bayes penalized regression me
 Depends:
   R (>= 3.1.0),
   fastGHQuad,
-  susiF.alpha (>= 0.1.218),
+  susiF.alpha (>= 0.1.219),
   haarfisz
 License: MIT
 Encoding: UTF-8

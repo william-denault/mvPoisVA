@@ -178,7 +178,7 @@ if(init){
 }
 
 iter=1
-while( check >tol & iter <40 ){
+while( check >tol & iter <4 ){
 
   #### Check potential pb due to centering
   post_mat <- get_post_log_int(Mu_pm       = Mu_pm,
@@ -384,5 +384,5 @@ tt_all <- do.call(rbind,lapply( 1: nrow(Y), function(i)  reverse_intensity_trans
                                                                                       is.logprob = TRUE,
                                                                                       is.log_int = TRUE))
 )
-plot( Y,lol$ind_fitted_func )
-points( Y ,tt_all,  col="blue")
+plot( Y,tt_all)
+points( Y , lol$ind_fitted_func , col="blue")
