@@ -170,8 +170,8 @@ get_post_log_int <- function(Mu_pm,
 
 
 
-  Mu_pm[Mu_pm==-Inf] =  logit(0.1)
-  Mu_pm[Mu_pm==Inf] =  logit(0.9)
+  Mu_pm[Mu_pm==-Inf] =  logit(0.001)
+  Mu_pm[Mu_pm==Inf] =  logit(0.999)
   ### basic working exemple
   init_val_bin = c(c(Mu_pm[ ,-ncol(Y_min)]),log(c(Mu_pv[ ,-ncol(Y_min)])))
   init_val_pois =  Mu_pm[,ncol(Y_min)]

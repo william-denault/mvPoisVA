@@ -6,7 +6,7 @@ library(susieR)
 rm(list=ls())
 data(N3finemapping)
 init=TRUE
-set.seed(2)
+set.seed(1)
 #Example using curves simulated under the Mixture normal per scale prior
 check=1
 N <- 50   #Number of individuals
@@ -14,8 +14,8 @@ P <- 100     #Number of covariates/SNP
 pos1 <- 20   #Position of the causal covariate for effect 1
 pos2 <- 7   #Position of the causal covariate for effect 2
 lev_res <- 7#length of the molecular phenotype (2^lev_res)
-f1 <- sim_intenisty(lev_res )$sim_intens[-1]#first effect
-f2 <- sim_intenisty(lev_res )$sim_intens[-1]#second effect
+f1 <- 0.2*sim_intenisty(lev_res )$sim_intens[-1]#first effect
+f2 <- 0.2*sim_intenisty(lev_res )$sim_intens[-1]#second effect
 
 plot( f1, type ="l", ylab="effect", col="blue")
 abline(a=0,b=0)
@@ -178,10 +178,7 @@ if(init){
 }
 
 iter=1
-
-
-Mu_0 <- Mu_pm
-while( check >tol & iter <40 ){
+while( check >tol & iter <3 ){
 
   #### Check potential pb due to centering
   post_mat <- get_post_log_int(Mu_pm       = Mu_pm,
@@ -189,7 +186,7 @@ while( check >tol & iter <40 ){
                                Y_min       = Y_min,
                                Y_tot       = Y_tot,
                                sigma2_bin  = sigma2_bin,
-                               sigma2_pois = 1/ sigma2_pois,
+                               sigma2_pois = sigma2_pois,
                                b_pm        = b_pm,
                                gh_points   = gh_points,
                                tol         = tol_vga_pois)
@@ -201,15 +198,15 @@ while( check >tol & iter <40 ){
 
   Mu_pv <- post_mat$A_pv
 
-
+  tmp_Mu_pm <- susiF.alpha::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
+  W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
+             C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
 
 
 
   if(init){
 
-    tmp_Mu_pm <- susiF.alpha::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
-    W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
-               C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
+
     if (fit_approach %in% c("both", "penalized")){
       temp <- susiF.alpha:: init_prior(Y              = tmp_Mu_pm,
                                        X              = Z ,
@@ -262,7 +259,7 @@ while( check >tol & iter <40 ){
   if(fit_approach%in% c("both", "penalized")){
     tmp_Mu_pm_pen <- Mu_pm  -  fm_pm#potentially run smash on colmean
 
-    t_mean_EBmvFR <-  apply(tmp_Mu_pm_pen,2, mean )
+
     tmp_Mu_pm_pen <- susiF.alpha::colScale(tmp_Mu_pm_pen, scale=FALSE)
     W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_pen )],
                C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_pen )])
@@ -288,9 +285,7 @@ while( check >tol & iter <40 ){
     }
     b_pm <-   Z%*%  EBmvFR.obj$fitted_wc[[1]]
 
-    if( fit_approach== "penalized")
-    mat_mean <-   matrix( t_mean_EBmvFR , byrow = TRUE,
-                          nrow=nrow(X), ncol=ncol(Y))
+
 
   }else{
     b_pm <- 0* tmp_Mu_pm_pen
@@ -337,30 +332,30 @@ while( check >tol & iter <40 ){
                                              "*")
     )
     )
-   mat_mean <-   matrix( t_mean_susiF , byrow = TRUE,
-            nrow=nrow(X), ncol=ncol(Y))
+
   }else{
     fm_pm <-0* tmp_Mu_pm_fm
     susiF.obj   <- NULL
   }
 
 
-
-  resid <- Mu_pm -mat_mean -fm_pm-b_pm
+  resid <- Mu_pm-fm_pm-b_pm
   #not correct to work on later
   sigma2_pois <- var(c(resid[,ncol(resid)]))
   print(sigma2_pois)
   sigma2_bin  <- var(c(resid[,-ncol(resid)]))
   print(sigma2_bin)
-  Mu_pm <- mat_mean +fm_pm+b_pm#update
+  Mu_pm <- matrix( t_mean_susiF , byrow = TRUE,
+                   nrow=nrow(X), ncol=ncol(Y))+fm_pm+b_pm#update
 
-  print(    susiF.obj$cs)
+  print(
+    susiF.obj$cs)
   iter=iter+1
   ##include mr.ash
 
   par (mfrow=c(1,2))
   tt <- reverse_intensity_transform (vec_int = c(log( sigmoid(  Mu_pm[1,-ncol( Mu_pm)])),
-                                                  Mu_pm[1,ncol(Mu_pm)]   ),
+                                                 log(Y_min[1,ncol(Y_min)])  ),
                                      indx_lst = indx_lst,
                                      is.logprob = TRUE,
                                      is.log_int = TRUE)
@@ -391,18 +386,3 @@ tt_all <- do.call(rbind,lapply( 1: nrow(Y), function(i)  reverse_intensity_trans
 )
 plot( Y,lol$ind_fitted_func )
 points( Y ,tt_all,  col="blue")
-
-
-
-
-susiF.obj$fitted_wc[[1]][6,-ncol( Mu_pm)]
-
-tt <- reverse_intensity_transform (vec_int = c(log(sigmoid( susiF.obj$fitted_wc[[1]][6,-ncol( Mu_pm)]
-)),
-                                               log(mean(Y_min[ ,ncol(Y_min)])  )),
-                                   indx_lst = indx_lst,
-                                   is.logprob = TRUE,
-                                   is.log_int = TRUE)
-
-lines(tt, col="green")
-points( Y[1,], col="blue")
