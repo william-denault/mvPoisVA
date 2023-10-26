@@ -181,16 +181,16 @@ iter=1
 
 
 Mu_0 <- Mu_pm
-while( check >tol & iter <40 ){
+while( check >tol & iter <3 ){
 
   #### Check potential pb due to centering
   post_mat <- get_post_log_int(Mu_pm       = Mu_pm,
                                Mu_pv       = Mu_pv,
                                Y_min       = Y_min,
                                Y_tot       = Y_tot,
-                               sigma2_bin  = sigma2_bin,
-                               sigma2_pois = 1/ sigma2_pois,
-                               b_pm        = b_pm,
+                               sigma2_bin  = 1/sigma2_bin,
+                               sigma2_pois =   1/sigma2_pois,
+                               b_pm        =Mu_pm,
                                gh_points   = gh_points,
                                tol         = tol_vga_pois)
   if(verbose){
@@ -202,8 +202,8 @@ while( check >tol & iter <40 ){
   Mu_pv <- post_mat$A_pv
 
 
-
-
+  b_pm <- 0* Mu_pm
+  fm_pm <- 0* Mu_pm
 
   if(init){
 
@@ -252,10 +252,12 @@ while( check >tol & iter <40 ){
                                                   greedy  = greedy,
                                                   backfit = backfit
       )
+
       print('Done initializing susiF.obj')
 
     }
-
+    tmp_Mu_pm_pen <- 0*tmp_Mu_pm
+    tmp_Mu_pm_fm  <- 0*tmp_Mu_pm
     init=FALSE
   }
   #### fit EBmvFR ----
@@ -360,18 +362,21 @@ while( check >tol & iter <40 ){
 
   par (mfrow=c(1,2))
   tt <- reverse_intensity_transform (vec_int = c(log( sigmoid(  Mu_pm[1,-ncol( Mu_pm)])),
-                                                  Mu_pm[1,ncol(Mu_pm)]   ),
+                                                 log(Y_min[1,ncol(Y_min)])  ),
                                      indx_lst = indx_lst,
                                      is.logprob = TRUE,
                                      is.log_int = TRUE)
-  plot(tt)
+  plot ( Y[1,], col="blue")
+ points (tt)
   lines(tt, col="green")
-  points( Y[1,], col="blue")
+
 
   plot( Y[1,],tt)
 
   abline(a=0,b=1)
   par (mfrow=c(1,1))
+
+
 }
 tidx
 susiF.obj$cs
@@ -389,20 +394,9 @@ tt_all <- do.call(rbind,lapply( 1: nrow(Y), function(i)  reverse_intensity_trans
                                                                                       is.logprob = TRUE,
                                                                                       is.log_int = TRUE))
 )
+
+plot(   tt , tt_all[1,])
 plot( Y,lol$ind_fitted_func )
 points( Y ,tt_all,  col="blue")
-
-
-
-
-susiF.obj$fitted_wc[[1]][6,-ncol( Mu_pm)]
-
-tt <- reverse_intensity_transform (vec_int = c(log(sigmoid( susiF.obj$fitted_wc[[1]][6,-ncol( Mu_pm)]
-)),
-                                               log(mean(Y_min[ ,ncol(Y_min)])  )),
-                                   indx_lst = indx_lst,
-                                   is.logprob = TRUE,
-                                   is.log_int = TRUE)
-
-lines(tt, col="green")
-points( Y[1,], col="blue")
+cor(c(Y), c(lol$ind_fitted_func))
+cor(c(Y), c(tt_all))
