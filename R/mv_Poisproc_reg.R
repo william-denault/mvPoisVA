@@ -344,6 +344,7 @@ mv_Poisproc_reg <- function(Y,
 
   if( fit_approach ==   "both" )
   {
+    susiF.obj <- susiF.alpha::update_cal_pip(susiF.obj)
     out <- list( Mu_pm=Mu_pm,
                  susiF.obj=susiF.obj,
                  EBmvFR.obj=EBmvFR.obj,
@@ -352,6 +353,7 @@ mv_Poisproc_reg <- function(Y,
 
   if( fit_approach ==   "fine_mapping" )
   {
+    susiF.obj <- susiF.alpha::update_cal_pip(susiF.obj)
     out <- list( Mu_pm=Mu_pm,
                  susiF.obj=susiF.obj,
                  fitted = tt_all[,idx_out]  )

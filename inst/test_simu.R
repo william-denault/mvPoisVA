@@ -12,8 +12,8 @@ idx <- which( apply( genotype,2, var ) <1e-15)
 genotype <- genotype [, -idx]
 library(gplots)#
 
-if(file.exists("/home/wdenault/fsusi_simu/sim3/comparison_susie_fusie_128_sd1.RData")){
-  load("/home/wdenault/fsusi_simu/sim3/comparison_susie_fusie_128_sd1.RData")
+if(file.exists("/home/wdenault/benchmark_mvPois/sim/comparison_mvPois_fusie_gFSuSiE.RData")){
+  load("/home/wdenault/benchmark_mvPois/comparison_mvPois_fusie_gFSuSiE.RData")
 
 }else{
   res <-list()
@@ -54,6 +54,7 @@ for (o  in (length(res)+1):10000) {
   G <- genotype+5
 
   tpos <- sample(1:ncol(genotype), replace = FALSE,size=2)
+  true_pos <- tpos
   pos1 <- tpos[1]
   pos2 <- tpos[2]
   if( length(which(apply(G,2,var)==0))>0){
@@ -62,10 +63,10 @@ for (o  in (length(res)+1):10000) {
   # G <- matrix( rnorm(nrow(genotype)*300), nrow = nrow(genotype))
 
 
-beta0       <- 0
-beta1       <- 1
-beta2       <- 1
-count.data  <- list()
+  beta0       <- 0
+  beta1       <- 1
+  beta2       <- 1
+  count.data  <- list()
   for ( i in 1:N)
   {
     predictor <-beta1*G[i,pos1]*f1 + beta2*G[i,pos2]*f2
@@ -84,10 +85,13 @@ count.data  <- list()
   res2 <- Pois_fSuSiE (Y=Y,X=X, L=3)
 
   out <-  list( mv_POIS = res$susiF.obj$pip,
-                susiF_cs= res0$pip,
+                mv_POIS_cs= res$susiF.obj$cs,
+                susiF_pip= res0$pip,
+                susiF_cs= res0$cs,
                 g_susiF=res2$susiF.obj$pip,
+                g_susiF_cs=res2$susiF.obj$cs,
                 true_pos=true_pos)
   res[[o]] <- out
-  #save(res, file="/home/wdenault/fsusi_simu/sim3/comparison_susie_fusie_128_sd1.RData")
+  save(res, file="/home/wdenault/benchmark_mvPois/comparison_mvPois_fusie_gFSuSiE.RData")
 
 }
