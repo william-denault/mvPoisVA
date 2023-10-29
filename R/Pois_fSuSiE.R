@@ -64,6 +64,8 @@ Pois_fSuSiE <- function(Y,
     tl <- lapply(1:nrow(Y), function(i) reflect_vec(Y[i,]))
     Y <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$x))
     idx_out <- tl[[1]]$idx #### indx of interest at the end
+  }else{
+    idx_out <- 1: ncol(Y)
   }
   #### to avoid 0 in Y_min to correct at the end
   Y <- Y+1
