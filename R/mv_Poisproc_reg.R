@@ -69,7 +69,7 @@ mv_Poisproc_reg <- function(Y,
     idx_out <- 1: ncol(Y)
   }
   #### to avoid 0 in Y_min to correct at the end
-  Y <- Y+1
+  Y <- Y
 
   if(fit_approach %in% c('both',"fine_mapping")){
     tidx <- which(apply(X,2,var)==0)
@@ -164,6 +164,9 @@ mv_Poisproc_reg <- function(Y,
     if(init){
 
       tmp_Mu_pm <- susiF.alpha::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
+
+      lowc_wc <-  which_lowcount(tmp_Mu_pm,
+                                 thresh_lowcount=thresh_lowcount)
       W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
       if (fit_approach %in% c("both", "penalized")){
@@ -262,7 +265,6 @@ mv_Poisproc_reg <- function(Y,
       tmp_Mu_pm_fm <- susiF.alpha::colScale(tmp_Mu_pm_fm, scale=FALSE)
       W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_fm )],
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
-
 
       susiF.obj     <- susiF.workhorse(susiF.obj      = susiF.obj,
                                        W              = W,

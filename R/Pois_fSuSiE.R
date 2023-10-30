@@ -68,7 +68,7 @@ Pois_fSuSiE <- function(Y,
     idx_out <- 1: ncol(Y)
   }
   #### to avoid 0 in Y_min to correct at the end
-  Y <- Y+1
+  Y <- Y
 
   if(fit_approach %in% c('both',"fine_mapping")){
     tidx <- which(apply(X,2,var)==0)
@@ -94,7 +94,6 @@ Pois_fSuSiE <- function(Y,
   X <- susiF.alpha:::colScale(X)
 
 
-  lowc_wc <-  NULL
 
   init_val_pois<- c(log(Y+1))
   beta_pois <- 0* c(log(Y+1))
@@ -137,9 +136,12 @@ Pois_fSuSiE <- function(Y,
 
 
 
+print("here1")
     if(init){
 
       tmp_Mu_pm <- susiF.alpha::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
+      lowc_wc <-  which_lowcount(tmp_Mu_pm,
+                                 thresh_lowcount=thresh_lowcount)
       W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
       if (fit_approach %in% c("both", "penalized")){
@@ -163,6 +165,7 @@ Pois_fSuSiE <- function(Y,
         print('Done initializing EBmvFR.obj')
       }
       if(fit_approach %in%c("both","fine_mapping")){
+
         temp <- susiF.alpha:: init_prior(Y              = tmp_Mu_pm,
                                          X              = X ,
                                          prior          = prior_mv ,
@@ -191,6 +194,7 @@ Pois_fSuSiE <- function(Y,
       tmp_Mu_pm_fm  <- 0*tmp_Mu_pm
       init=FALSE
     }
+
     #### fit EBmvFR ----
     if(fit_approach%in% c("both", "penalized")){
       tmp_Mu_pm_pen <- Mu_pm  -  fm_pm#potentially run smash on colmean
@@ -238,7 +242,7 @@ Pois_fSuSiE <- function(Y,
       tmp_Mu_pm_fm <- susiF.alpha::colScale(tmp_Mu_pm_fm, scale=FALSE)
       W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_fm )],
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
-
+print(sum(is.na (tmp_Mu_pm_fm )))
 
       susiF.obj     <- susiF (
         Y             =  tmp_Mu_pm_fm ,
