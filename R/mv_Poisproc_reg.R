@@ -37,7 +37,7 @@ mv_Poisproc_reg <- function(Y,
                             cal_obj.fsusie=FALSE,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
-                            cor_small=FALSE
+                            cor_small=TRUE
 )
 {
   ####Changer les calcul d'objective -----
@@ -117,6 +117,7 @@ mv_Poisproc_reg <- function(Y,
 
   if(init){
     Mu_pm = logit((Y_min/Y_tot) ) #remove last column contain C coeff
+    #Mu_pm[which(is.na(Mu_pm))]<-Inf
     Mu_pm[Mu_pm==-Inf] =  logit(0.1)
     Mu_pm[Mu_pm==Inf]  =  logit(0.9)
 

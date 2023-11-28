@@ -12,8 +12,8 @@ idx <- which( apply( genotype,2, var ) <1e-15)
 genotype <- genotype [, -idx]
 library(gplots)#
 
-if(file.exists("D:/Document/Serieux/Travail/Package/mvPoisVA/comp_fsusie.RData")){
-  load("D:/Document/Serieux/Travail/Package/mvPoisVA/comp_fsusie.RData")
+if(file.exists("/home/wdenault/benchmark_mvPois/no_noise_mvPois_fusie_gFSuSiE.RData")){
+  load("/home/wdenault/benchmark_mvPois/no_noise_mvPois_fusie_gFSuSiE.RData")
 
 }else{
   res <-list()
@@ -72,7 +72,7 @@ for (o  in (length(res)+1):10000) {
     for ( l in 1:L){
       predictor <-predictor + G[i, true_pos[l]]*lf[[l]]
     }
-    predictor <- exp(predictor+ rnorm(  length(lf[[1]]), sd=mysd))
+    predictor <- exp(predictor )
 
     count.data [[i]] <-   rpois(n= length(lf[[1]]) ,
                                 lambda =predictor  )
@@ -82,7 +82,7 @@ for (o  in (length(res)+1):10000) {
 
 
   Y <- count.data
-  res0 <-susiF (Y=Y,X=X, L=3)
+  res0 <-susiF (Y=Y,X=X, L=3,post_processing ="none")
   res1 <- mv_Poisproc_reg (Y=Y,X=X, L=3)
 
   res2 <- Pois_fSuSiE (Y=Y,X=X, L=3)
@@ -95,5 +95,6 @@ for (o  in (length(res)+1):10000) {
                 g_susiF_cs=res2$susiF.obj$cs,
                 true_pos=true_pos)
   res[[o]] <- out
-  save(res, file = "comp_fsusie.RData")
+  save(res, file="/home/wdenault/benchmark_mvPois/no_noise_mvPois_fusie_gFSuSiE.RData")
+
 }

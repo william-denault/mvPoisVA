@@ -238,7 +238,11 @@ HF_susiF <- function(Y, X, Z, L = 2,
   }
 
 
-
+  tidx <- which(apply(X,2,var)==0)
+  if( length(tidx)>0){
+    warning(paste("Some of the columns of X are constants, we removed" ,length(tidx), "columns"))
+    X <- X[,-tidx]
+  }
 
 
 
@@ -326,8 +330,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
                                      control_mixsqp = control_mixsqp,
                                      nullweight     = nullweight ,
                                      gridmult       = gridmult ,
-                                     max_SNP_EM     = max_SNP_EM,
-                                     max_SNP_EM     = max_SNP_EM)
+                                     max_SNP_EM     = max_SNP_EM )
     G_prior     <- temp$G_prior
 
 
@@ -348,8 +351,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
                                      control_mixsqp = control_mixsqp,
                                      nullweight     = nullweight ,
                                      gridmult       = gridmult ,
-                                     max_SNP_EM     = max_SNP_EM,
-                                     max_step_EM    = max_step_EM
+                                     max_SNP_EM     = max_SNP_EM
                                      )
     G_prior     <- temp$G_prior
 
@@ -412,7 +414,7 @@ print(fit_approach)
                                    W              = W,
                                    X              = X,
                                    tol            = tol,
-                                   low_wc         = low_wc,
+
                                    init_pi0_w     = init_pi0_w ,
                                    control_mixsqp = control_mixsqp ,
                                    indx_lst       = indx_lst,
