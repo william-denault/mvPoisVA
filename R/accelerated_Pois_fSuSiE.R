@@ -4,40 +4,40 @@
 
 
 
-Pois_fSuSiE <- function(Y,
-                            Z,
-                            X,
-                            L=3,
-                            L_start=3,
-                            reflect =FALSE,
-                            verbose=TRUE,
-                            n_gh = 10,
-                            init_b_pm,
-                            tol= 1e-3,
-                            tol_vga_pois=1e-5,
-                            maxit=10,
-                            control_mixsqp=  list(verbose=FALSE,
-                                                  eps = 1e-6,
-                                                  numiter.em = 4
-                            ),
-                            thresh_lowcount=0,
-                            prior_mv=  "mixture_normal_per_scale",
-                            gridmult=sqrt(2),
-                            nullweight.mrash=10,
-                            init_pi0_w.mrash=10,
-                            cov_lev=0.95,
-                            min.purity     =0.5,
-                            greedy=TRUE,
-                            backfit=TRUE,
-                            tol.mrash=1e-3,
-                            verbose.mrash=TRUE,
-                            maxit.mrash=10,
-                            cal_obj.mrash=FALSE,
-                            maxit.fsusie=50,
-                            cal_obj.fsusie=FALSE,
-                            max_SNP_EM     = 100,
-                            max_step_EM    = 1,
-                            cor_small=FALSE
+acc_Pois_fSuSiE <- function(Y,
+                        Z,
+                        X,
+                        L=3,
+                        L_start=3,
+                        reflect =FALSE,
+                        verbose=TRUE,
+                        n_gh = 10,
+                        init_b_pm,
+                        tol= 1e-3,
+                        tol_vga_pois=1e-5,
+                        maxit=10,
+                        control_mixsqp=  list(verbose=FALSE,
+                                              eps = 1e-6,
+                                              numiter.em = 4
+                        ),
+                        thresh_lowcount=0,
+                        prior_mv=  "mixture_normal_per_scale",
+                        gridmult=sqrt(2),
+                        nullweight.mrash=10,
+                        init_pi0_w.mrash=10,
+                        cov_lev=0.95,
+                        min.purity     =0.5,
+                        greedy=TRUE,
+                        backfit=TRUE,
+                        tol.mrash=1e-3,
+                        verbose.mrash=TRUE,
+                        maxit.mrash=10,
+                        cal_obj.mrash=FALSE,
+                        maxit.fsusie=50,
+                        cal_obj.fsusie=FALSE,
+                        max_SNP_EM     = 100,
+                        max_step_EM    = 1,
+                        cor_small=FALSE
 )
 {
   ####Changer les calcul d'objective -----
@@ -104,7 +104,11 @@ Pois_fSuSiE <- function(Y,
   iter=1
   beta_pois <- 0* c(log(Mu_pm +1))
   check <- 3*tol
-  while( check >tol & iter <3 ){
+
+  ##### Poisson Part ----
+
+
+  while(  iter <15 ){#check >tol &
 
     init_val_pois<- c(log(Y+1))
     beta_pois <- c(Mu_pm)
@@ -129,14 +133,22 @@ Pois_fSuSiE <- function(Y,
     }
 
 
-    Mu_pv <- matrix(opt_Poisson$v,byrow = FALSE, ncol=ncol(Y))
+    tt <-  ash(opt_Poisson$m,opt_Poisson$v)
 
-    b_pm <- 0* Mu_pm
-    fm_pm <- 0* Mu_pm
+    resid <- Mu_pm -matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
+    #not correct to work on later
+    sigma2_pois <- var(c(resid ))
+    #print(sigma2_pois)
+    Mu_pm <- matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
+iter=iter+1
 
+# plot(  Mu_pm,Y)
+  }
 
+  #### SuSiE part ----
 
-print("here1")
+ init=TRUE
+
     if(init){
 
       tmp_Mu_pm <- susiF.alpha::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
@@ -242,7 +254,7 @@ print("here1")
       tmp_Mu_pm_fm <- susiF.alpha::colScale(tmp_Mu_pm_fm, scale=FALSE)
       W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_fm )],
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
-print(sum(is.na (tmp_Mu_pm_fm )))
+      print(sum(is.na (tmp_Mu_pm_fm )))
 
       susiF.obj     <- susiF (
         Y             =  tmp_Mu_pm_fm ,
@@ -279,28 +291,10 @@ print(sum(is.na (tmp_Mu_pm_fm )))
     }
 
 
-    resid <- Mu_pm -mat_mean -fm_pm-b_pm
-    #not correct to work on later
-    sigma2_pois <- var(c(resid ))
-    #print(sigma2_pois)
-    Mu_pm <- mat_mean +fm_pm+b_pm#update
 
     print(    susiF.obj$cs)
     iter=iter+1
-    ##include mr.ash
 
-    #  par (mfrow=c(1,2))
-
-    # plot ( Y[1,], col="blue")
-    #points ( exp(Mu_pm  [1,]))
-    # lines(exp(Mu_pm  [1,]), col="green")
-
-
-    #plot( Y[1,],exp(Mu_pm  [1,]))
-
-    #abline(a=0,b=1)
-    #par (mfrow=c(1,1))
-  }
 
 
 

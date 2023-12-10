@@ -82,17 +82,21 @@ for (o  in (length(res)+1):10000) {
 
 
   Y <- count.data
+
+
   res0 <-susiF (Y=Y,X=X, L=3)
   res1 <- mv_Poisproc_reg (Y=Y,X=X, L=3)
 
   res2 <- Pois_fSuSiE (Y=Y,X=X, L=3)
-
+  res3 <- acc_Pois_fSuSiE(Y=Y,X=X, L=3)
   out <-  list( mv_POIS = res1$susiF.obj$pip,
                 mv_POIS_cs= res1$susiF.obj$cs,
                 susiF_pip= res0$pip,
                 susiF_cs= res0$cs,
                 g_susiF=res2$susiF.obj$pip,
                 g_susiF_cs=res2$susiF.obj$cs,
+                acc_g_susiF=res3$susiF.obj$pip,
+                acc_g_susiF_cs=res3$susiF.obj$cs,
                 true_pos=true_pos)
   res[[o]] <- out
   save(res, file = "comp_fsusie.RData")
