@@ -84,11 +84,11 @@ for (o  in (length(res)+1):10000) {
   Y <- count.data
 
 
+  res3 <- acc_Pois_fSuSiE(Y=Y,X=X, L=3)
   res0 <-susiF (Y=Y,X=X, L=3)
   res1 <- mv_Poisproc_reg (Y=Y,X=X, L=3)
 
   res2 <- Pois_fSuSiE (Y=Y,X=X, L=3)
-  res3 <- acc_Pois_fSuSiE(Y=Y,X=X, L=3)
   out <-  list( mv_POIS = res1$susiF.obj$pip,
                 mv_POIS_cs= res1$susiF.obj$cs,
                 susiF_pip= res0$pip,

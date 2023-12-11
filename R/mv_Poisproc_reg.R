@@ -1,7 +1,7 @@
 
 
 
-
+#' @export
 
 
 mv_Poisproc_reg <- function(Y,

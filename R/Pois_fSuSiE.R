@@ -2,6 +2,7 @@
 
 
 
+#' @export
 
 
 Pois_fSuSiE <- function(Y,

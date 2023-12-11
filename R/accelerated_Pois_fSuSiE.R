@@ -2,6 +2,7 @@
 
 
 
+#' @export
 
 
 acc_Pois_fSuSiE <- function(Y,
@@ -133,7 +134,7 @@ acc_Pois_fSuSiE <- function(Y,
     }
 
 
-    tt <-  ash(opt_Poisson$m,opt_Poisson$v)
+    tt <-  ashr::ash(opt_Poisson$m,opt_Poisson$v)
 
     resid <- Mu_pm -matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
     #not correct to work on later
