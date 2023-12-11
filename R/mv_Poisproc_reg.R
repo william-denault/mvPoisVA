@@ -37,7 +37,8 @@ mv_Poisproc_reg <- function(Y,
                             cal_obj.fsusie=FALSE,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
-                            cor_small=TRUE
+                            cor_small=TRUE,
+                            max.iter=3
 )
 {
   ####Changer les calcul d'objective -----
@@ -138,7 +139,7 @@ mv_Poisproc_reg <- function(Y,
   iter <- 1
   check <- 3*tol
   Mu_0 <- Mu_pm
-  while( check >tol & iter <3 ){
+  while( check >tol & iter <max.iter ){
 
     #### Check potential pb due to centering
     post_mat <- get_post_log_int(Mu_pm       = Mu_pm,

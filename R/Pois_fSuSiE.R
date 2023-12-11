@@ -38,7 +38,8 @@ Pois_fSuSiE <- function(Y,
                             cal_obj.fsusie=FALSE,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
-                            cor_small=FALSE
+                            cor_small=FALSE,
+                            max.iter=3
 )
 {
   ####Changer les calcul d'objective -----
@@ -105,7 +106,7 @@ Pois_fSuSiE <- function(Y,
   iter=1
   beta_pois <- 0* c(log(Mu_pm +1))
   check <- 3*tol
-  while( check >tol & iter <3 ){
+  while( check >tol & iter <max.iter ){
 
     init_val_pois<- c(log(Y+1))
     beta_pois <- c(Mu_pm)
