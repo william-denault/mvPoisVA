@@ -101,3 +101,31 @@ for (o  in (length(res)+1):10000) {
   res[[o]] <- out
   save(res, file = "D:/Document/Serieux/Travail/Package/mvPoisVA/comp_fsusie.RData")
 }
+
+
+
+tt <- res[[1]]
+pip_acc <- c()
+pip     <- c()
+pip_acc <-  c(pip_acc, tt$acc_g_susiF)
+pip  <-  c(pip , tt$g_susiF)
+
+col <- rep("black", length(tt$g_susiF))
+my_pch <- rep( 1, length(tt$g_susiF))
+
+col[tt$true_pos] <- "red"
+my_pch[tt$true_pos] <- 19
+plot( pip, pip_acc,col=col, pch=my_pch)
+for ( i in 1:15){
+  tt <- res[[i]]
+  col <- rep("black", length(tt$g_susiF))
+  my_pch <- rep( 1, length(tt$g_susiF))
+
+  col[tt$true_pos] <- "red"
+  my_pch[tt$true_pos] <- 19
+  points(   tt$acc_g_susiF,tt$g_susiF,col=col, pch=my_pch)
+  pip_acc <-  c(pip_acc, tt$acc_g_susiF)
+  pip  <-  c(pip , tt$g_susiF)
+
+}
+

@@ -38,7 +38,7 @@ Pois_fSuSiE <- function(Y,
                             cal_obj.fsusie=FALSE,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
-                            cor_small=FALSE,
+                            cor_small=TRUE,
                             max.iter=3
 )
 {
@@ -246,21 +246,19 @@ print("here1")
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
 print(sum(is.na (tmp_Mu_pm_fm )))
 
-      susiF.obj     <- susiF (
-        Y             =  tmp_Mu_pm_fm ,
-        X              = X,
-        tol            = tol,
-        control_mixsqp = control_mixsqp ,
-
-        nullweight     = nullweight.mrash,
-        cal_obj        = cal_obj.fsusie,
-        verbose        = verbose,
-        cov_lev        = cov_lev,
-        min.purity     = min.purity,
-        maxit          = maxit.fsusie ,
-        cor_small = TRUE)
-
-
+     susiF.obj     <- susiF (
+                                Y              =  tmp_Mu_pm_fm ,
+                                X               = X,
+                                tol             = tol,
+                                control_mixsqp  = control_mixsqp ,
+                                nullweight      = nullweight.mrash,
+                                cal_obj         = cal_obj.fsusie,
+                                verbose         = verbose,
+                                cov_lev         = cov_lev,
+                                min.purity      = min.purity,
+                                maxit           = maxit.fsusie ,
+                                cor_small       = cor_small,
+                                post_processing = "none")
 
 
 

@@ -37,7 +37,7 @@ mv_Poisproc_reg <- function(Y,
                             cal_obj.fsusie=FALSE,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
-                            cor_small=FALSE,
+                            cor_small=TRUE,
                             max.iter=3
 )
 {
@@ -283,7 +283,7 @@ mv_Poisproc_reg <- function(Y,
                                        min.purity     = min.purity,
                                        maxit          = maxit.fsusie,
                                        tt             = temp$tt,
-                                       cor_small      = FALSE)
+                                       cor_small      =cor_small)
 
 
 
