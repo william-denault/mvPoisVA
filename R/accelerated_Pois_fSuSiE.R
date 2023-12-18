@@ -258,8 +258,9 @@ iter=iter+1
       print(sum(is.na (tmp_Mu_pm_fm )))
 
       susiF.obj     <- susiF (
-                                Y              =  tmp_Mu_pm_fm ,
+                                Y               =  tmp_Mu_pm_fm ,
                                 X               = X,
+                                L               = L,
                                 tol             = tol,
                                 control_mixsqp  = control_mixsqp ,
                                 nullweight      = nullweight.mrash,

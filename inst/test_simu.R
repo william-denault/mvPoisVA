@@ -116,7 +116,7 @@ my_pch <- rep( 1, length(tt$g_susiF))
 col[tt$true_pos] <- "red"
 my_pch[tt$true_pos] <- 19
 plot( pip, pip_acc,col=col, pch=my_pch)
-for ( i in 1:15){
+for ( i in 1:38){
   tt <- res[[i]]
   col <- rep("black", length(tt$g_susiF))
   my_pch <- rep( 1, length(tt$g_susiF))
