@@ -1,7 +1,7 @@
 Package: mvPoisVA
 Type: Package
 Title: Regression methods for inhomogeneous Poisson processes
-Version: 0.1.1.004
+Version: 0.1.1.005
 Author: William R.P. Denault
 Maintainer: <wdenault@uchicago.edu>
 Description: Implementation of fSuSiE and Empirical Bayes penalized regression methods for inhomogeneous Poisson processes
