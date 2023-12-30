@@ -1,3 +1,88 @@
+
+#' @export
+#'
+#' @examples
+#'library(mvPoisVA)
+#'library(susiF.alpha)
+#'library(susieR)
+#'data(N3finemapping)
+#'X <- N3finemapping$X
+#'mysd=0.1
+#'N =30
+
+#'lev_res =8
+
+#'genotype <-X[1:N,1:500]
+
+#'idx <- which( apply( genotype,2, var ) <1e-15)
+#'genotype <- genotype [, -idx]
+#'count.data  <- list()
+#'L <-2# sample(1:2, size =1)#actual number of effect
+
+#'lf <-  list()
+#'for(l in 1:L){
+#'  lf[[l]] <-log(abs(0.2*sim_intenisty(lev_res )$sim_intens) )#functional effect for effect l
+#'}
+
+
+#'data(N3finemapping)
+#'X <- N3finemapping$X
+#'genotype <-X[sample(1:nrow(X), size=N),]
+
+#'idx <- which( apply( genotype,2, var ) <1e-15)
+#'if( length(idx)==0){
+#'  X <-genotype
+#'
+#'  Rtrue <- cor (genotype )
+#'}else{
+#'  genotype <- genotype [, -idx]
+#'  X <-genotype
+#'
+#'}
+#'G<- genotype
+#'X <- (X -0.99*min(X))/(0.5*max(X ))
+#'
+#'G <-  (G -0.99*min(G ))/(0.5*max(G ))
+#'
+#'tpos <- sample(1:ncol(genotype), replace = FALSE,size=2)
+#'true_pos <- tpos
+#'pos1 <- tpos[1]
+#'pos2 <- tpos[2]
+#'if( length(which(apply(G,2,var)==0))>0){
+#'  G <- G[,-which(apply(G,2,var)==0)]
+#'}
+#'# G <- matrix( rnorm(nrow(genotype)*300), nrow = nrow(genotype))
+#'
+#'
+#'predictor <-rep (0, length(lf[[1]] ))
+#'count.data  <- list()
+#'for ( i in 1:N)
+#'{
+#'
+#'  predictor <-rep (0, length(lf[[1]] ))
+#'
+#'  for ( l in 1:L){
+#'    predictor <-predictor + G[i, true_pos[l]]*lf[[l]]
+#'  }
+#'  predictor <- exp(predictor+ rnorm(  length(lf[[1]]), sd=mysd))
+#'
+#'  count.data [[i]] <-   rpois(n= length(lf[[1]]) ,
+#'                              lambda =predictor  )
+#'
+#'}
+#'count.data <- do.call(rbind, count.data)
+#'
+#'
+#'Y <- count.data
+#'
+#'Y[1,] <- NA
+#'Y[10, ] <- NA
+#'out <- fit_latent_space(Y)
+#'
+#'image (out$Y)
+#'plot(out$Y, Y)
+
+
 fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
   ##initiatilzation -----
 
