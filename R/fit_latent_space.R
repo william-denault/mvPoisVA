@@ -155,6 +155,10 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
 
   out <- matrix(NA, ncol=ncol(Y), nrow = nrow(Y))
   out [complete.cases(Y),] <- Mu_pm
+
+  colnames(out) <- colnames(Y)
+  rownames(out) <- rownames(Y)
+
   return( list(Y=out,
           reflect=reflect )
   )
