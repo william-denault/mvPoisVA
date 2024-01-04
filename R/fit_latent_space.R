@@ -102,15 +102,15 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
 
 
 
-  init_val_pois<- c(log(Y+1))
-  beta_pois <- 0* c(log(Y+1))
+  init_val_pois<- c(log(Y+0.0001))
+  beta_pois <- 0* c(log(Y+0.0001))
   sigma2_pois=1
 
   ##initiatilzation for count data -----
   Y_c <- Y[complete.cases(Y),]
   Mu_pm<-Y_c
   iter=1
-  beta_pois <- 0* c(log(Mu_pm +1))
+  beta_pois <- 0* c(log(Mu_pm +0.0001))
   check <- 3*tol
 
   ##### Poisson Part ----
@@ -118,7 +118,7 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
 
   while(  iter <15  ){#check >tol &
 
-    init_val_pois<- c(log(Y_c+1))
+    init_val_pois<- c(log(Y_c+0.0001))
     beta_pois <- c(Mu_pm)
     sigma2_pois=1
     opt_Poisson  <- vga_pois_solver(init_val = init_val_pois ,
