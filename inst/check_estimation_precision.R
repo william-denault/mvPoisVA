@@ -31,18 +31,22 @@ X[,true_pos] <- X[,true_pos]-min( X[,true_pos] )
 noise_data <- list()
 for ( i in 1:N){
 
-  predictor <-   0.1*(DJ.EX(n=2^7)[[4]]) *X[i,true_pos] +rnorm(length(lf[[1]]), sd=.5)
+  predictor <-   0.1*(DJ.EX(n=2^7)[[4]]) *X[i,true_pos] +rnorm(length(lf[[1]]), sd=1)
+  #predictor <-  mu *X[i,true_pos] +rnorm(length(lf[[1]]), sd=1 )
 
   noise_data[[i]]<- rpois(n, lambda=exp (predictor) )
 }
 
 Y <- do.call(rbind, noise_data)
 out <-acc_Pois_fSuSiE(Y=Y,X=X)
-out2 <-susiF(Y=log(Y+1),X=X)
+out2 <-susiF(Y=log(Y+1),X=X,post_processing = "HMM")
 out$susiF.obj$cs
 true_pos
 out2$cs
 
+plot( mu)
+lines (out2$fitted_func[[1]])
+lines(  exp(2)*out$susiF.obj$fitted_func[[1]],col="green" )
 
 plot( 0.051*(DJ.EX(n=2^7)[[4]]))
 lines (out2$fitted_func[[1]])
