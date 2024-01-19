@@ -38,7 +38,8 @@ acc_Pois_fSuSiE <- function(Y,
                         cal_obj.fsusie=FALSE,
                         max_SNP_EM     = 100,
                         max_step_EM    = 1,
-                        cor_small=TRUE
+                        cor_small=TRUE,
+                        post_processing="HMM"
 )
 {
   ####Changer les calcul d'objective -----
@@ -270,7 +271,7 @@ iter=iter+1
                                 min.purity      = min.purity,
                                 maxit           = maxit.fsusie ,
                                 cor_small       = cor_small,
-                                post_processing = "none")
+                                post_processing =post_processing)
 
 
 
