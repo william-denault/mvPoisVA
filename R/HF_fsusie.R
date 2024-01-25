@@ -269,7 +269,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
   if( length(which(rowSums(Y)==0) ) > (nrow(Y)-4)){
     stop('There less than 4 rows in the input matrix that are not equal to 0 ')
   }
-
+  Y_0 <-  Y
   Y    <- HFT(Y)
   W <- list(D= Y[,-ncol(Y)], C=Y[, ncol(Y)])
   # centering and scaling covariate
@@ -431,6 +431,18 @@ print(fit_approach)
                                    max_step_EM    = max_step_EM,
                                    cor_small      = cor_small,
                                    is.pois        = TRUE)
+print(str(Y))
+  susiF.obj <- susiF.alpha:: out_prep(obj           = susiF.obj,
+                        Y             = Y,
+                        X             = X,
+                        indx_lst      = indx_lst,
+                        filter.cs     = TRUE,
+                        outing_grid   = 1:ncol(Y),
+                        filter.number = 10,
+                        family = "DaubLeAsymm",
+                        TI            = TRUE,
+                        HMM           = FALSE
+  )
 
   #preparing output
   susiF.obj <- out_prep_HF_fsusie(susiF.obj   = susiF.obj

@@ -13,6 +13,10 @@
   lines(exp(fit$Eb))
  fit$sigma2
   plot(fit$obj)
+
+
+
+
 #'@details The problem is
 #'\deqn{x_i\sim Poisson(\exp(\mu_i)),}
 #'\deqn{\mu_i\sim N(b_i,\sigma^2),}
@@ -223,3 +227,4 @@ pois_mean_GG_opt_obj_gradient = function(theta,x,beta,sigma2,n){
   g2 = -(-exp(v)/2*exp(m+exp(v)/2) - exp(v)/2/sigma2 + 1/2)
   return(c(g1,g2))
 }
+

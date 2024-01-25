@@ -9,6 +9,7 @@ acc_Pois_fSuSiE <- function(Y,
                         Z,
                         X,
                         L=3,
+                        nugget=FALSE,
                         L_start=3,
                         reflect =FALSE,
                         verbose=TRUE,
@@ -106,46 +107,50 @@ acc_Pois_fSuSiE <- function(Y,
   iter=1
   beta_pois <- 0* c(log(Mu_pm +1))
   check <- 3*tol
-
+  sigma2_pois=0.1
   ##### Poisson Part ----
+  if (!nugget){
+    while(  iter <50 ){#check >tol &
 
+      init_val_pois<- c(log(Y+1))
+      beta_pois <- c(Mu_pm)
 
-  while(  iter <15 ){#check >tol &
-
-    init_val_pois<- c(log(Y+1))
-    beta_pois <- c(Mu_pm)
-    sigma2_pois=1
-    opt_Poisson  <- vga_pois_solver(init_val = init_val_pois ,
-                                    x        = c(Y),
-                                    s        = rep( 1, prod (dim(Y))),
-                                    beta     = beta_pois,
-                                    sigma2   = sigma2_pois,
-                                    maxiter  = 10,
-                                    tol      = tol,
-                                    method   = 'newton')
-
-
-
-    Mu_pm <- matrix(opt_Poisson$m,byrow = FALSE, ncol=ncol(Y))
+      opt_Poisson  <- vga_pois_solver(init_val = init_val_pois ,
+                                      x        = c(Y),
+                                      s        = rep( 1, prod (dim(Y))),
+                                      beta     = beta_pois,
+                                      sigma2   = sigma2_pois,
+                                      maxiter  = 50,
+                                      tol      = tol,
+                                      method   = 'newton')
 
 
 
-    if(verbose){
-      print( paste('Posterior log intensity computed for iter ',iter))
+      Mu_pm <- matrix(opt_Poisson$m,byrow = FALSE, ncol=ncol(Y))
+
+
+
+      if(verbose){
+        print( paste('Posterior log intensity computed for iter ',iter))
+      }
+
+
+      tt <-  ashr::ash(opt_Poisson$m,opt_Poisson$v)
+
+      resid <- Mu_pm -matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
+      #not correct to work on later
+      sigma2_pois <- var(c(resid ))
+      #print(sigma2_pois)
+      Mu_pm <- matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
+      iter=iter+1
+
+      # plot(  Mu_pm,Y)
     }
+  }else{
 
-
-    tt <-  ashr::ash(opt_Poisson$m,opt_Poisson$v)
-
-    resid <- Mu_pm -matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
-    #not correct to work on later
-    sigma2_pois <- var(c(resid ))
-    #print(sigma2_pois)
-    Mu_pm <- matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
-iter=iter+1
-
-# plot(  Mu_pm,Y)
+    Mu_pm <-fit_latent_nugget(Y)$Y
   }
+
 
   #### SuSiE part ----
 

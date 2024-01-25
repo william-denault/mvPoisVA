@@ -116,7 +116,7 @@ Pois_fSuSiE <- function(Y,
                                     s        = rep( 1, prod (dim(Y))),
                                     beta     = beta_pois,
                                     sigma2   = sigma2_pois,
-                                    maxiter  = 10,
+                                    maxiter  = 50,
                                     tol      = tol,
                                     method   = 'newton')
 

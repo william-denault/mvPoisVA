@@ -102,31 +102,31 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
 
 
 
-  init_val_pois<- c(log(Y+0.0001))
-  beta_pois <- 0* c(log(Y+0.0001))
+  init_val_pois<- c(log(Y+1))
+  beta_pois <- 0* c(log(Y+1))
   sigma2_pois=1
 
   ##initiatilzation for count data -----
   Y_c <- Y[complete.cases(Y),]
   Mu_pm<-Y_c
   iter=1
-  beta_pois <- 0* c(log(Mu_pm +0.0001))
+  beta_pois <- 0* c(log(Mu_pm +1))
   check <- 3*tol
 
   ##### Poisson Part ----
+  sigma2_pois=0.1
 
+  while(  iter <50  ){#check >tol &
 
-  while(  iter <15  ){#check >tol &
-
-    init_val_pois<- c(log(Y_c+0.0001))
+    init_val_pois<- c(log(Y_c+1))
     beta_pois <- c(Mu_pm)
-    sigma2_pois=1
+
     opt_Poisson  <- vga_pois_solver(init_val = init_val_pois ,
                                     x        = c(Y_c),
                                     s        = rep( 1, prod (dim(Y_c))),
                                     beta     = beta_pois,
                                     sigma2   = sigma2_pois,
-                                    maxiter  = 10,
+                                    maxiter  =  100,
                                     tol      = tol,
                                     method   = 'newton')
 
@@ -161,5 +161,50 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
 
   return( list(Y=out,
           reflect=reflect )
+  )
+}
+
+
+
+
+
+
+fit_latent_nugget<- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
+  ##initiatilzation -----
+
+  J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
+  if(reflect){
+    tl <- lapply(1:nrow(Y), function(i) reflect_vec(Y[i,]))
+    Y <- do.call(rbind, lapply(1:length(tl), function(i) tl[[i]]$x))
+    idx_out <- tl[[1]]$idx #### indx of interest at the end
+  }else{
+    idx_out <- 1: ncol(Y)
+  }
+  #### to avoid 0 in Y_min to correct at the end
+
+
+  indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
+
+
+
+
+  init_val_pois<- c(log(Y+1))
+  beta_pois <- 0* c(log(Y+1))
+  sigma2_pois=1
+
+  ##initiatilzation for count data -----
+  Y_c <- Y[complete.cases(Y),]
+
+
+  Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)pois_smooth_split(Y[i,])$Emu ))
+
+  out <- matrix(NA, ncol=ncol(Y), nrow = nrow(Y))
+  out [complete.cases(Y),] <- Mu_pm
+
+  colnames(out) <- colnames(Y)
+  rownames(out) <- rownames(Y)
+
+  return( list(Y=out,
+               reflect=reflect )
   )
 }

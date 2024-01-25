@@ -85,7 +85,7 @@ for (o  in (length(res)+1):10000) {
 
 
   res3 <- acc_Pois_fSuSiE(Y=Y,X=X, L=3)
-  res0 <-susiF (Y=Y,X=X, L=3)
+  res0 <-susiF (Y=log(Y+1),X=X, L=3)
   #res1 <- mv_Poisproc_reg (Y=Y,X=X, L=3)
 
   res2 <- Pois_fSuSiE (Y=Y,X=X, L=3)
