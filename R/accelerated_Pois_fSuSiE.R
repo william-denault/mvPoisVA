@@ -22,8 +22,8 @@ acc_Pois_fSuSiE <- function(Y,
                                               eps = 1e-6,
                                               numiter.em = 4
                         ),
-                        thresh_lowcount=0,
-                        prior_mv=  "mixture_normal_per_scale",
+                        thresh_lowcount= 1e-2,
+                        prior_mv=  "mixture_normal",
                         gridmult=sqrt(2),
                         nullweight.mrash=10,
                         init_pi0_w.mrash=10,
@@ -41,6 +41,7 @@ acc_Pois_fSuSiE <- function(Y,
                         max_step_EM    = 1,
                         cor_small=TRUE,
                         post_processing="HMM"
+
 )
 {
   ####Changer les calcul d'objective -----
@@ -134,7 +135,7 @@ acc_Pois_fSuSiE <- function(Y,
         print( paste('Posterior log intensity computed for iter ',iter))
       }
 
-
+      opt_Poisson$v <- opt_Poisson$v +1e-10# prevent some underflow problem
       tt <-  ashr::ash(opt_Poisson$m,opt_Poisson$v)
 
       resid <- Mu_pm -matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
@@ -264,7 +265,7 @@ acc_Pois_fSuSiE <- function(Y,
       print(sum(is.na (tmp_Mu_pm_fm )))
 
       susiF.obj     <- susiF (
-                                Y               =  tmp_Mu_pm_fm ,
+                                Y               = tmp_Mu_pm_fm ,
                                 X               = X,
                                 L               = L,
                                 tol             = tol,
@@ -276,7 +277,8 @@ acc_Pois_fSuSiE <- function(Y,
                                 min.purity      = min.purity,
                                 maxit           = maxit.fsusie ,
                                 cor_small       = cor_small,
-                                post_processing =post_processing)
+                                post_processing = post_processing,
+                                thresh_lowcount = thresh_lowcount)
 
 
 

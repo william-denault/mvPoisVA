@@ -140,7 +140,7 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
       print( paste('Posterior log intensity computed for iter ',iter))
     }
 
-
+    opt_Poisson$v <- opt_Poisson$v +1e-10# prevent some underflow problem
     tt <-  ashr::ash(opt_Poisson$m,opt_Poisson$v)
 
     resid <- Mu_pm -matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y_c))
@@ -160,7 +160,7 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
   rownames(out) <- rownames(Y)
 
   return( list(Y=out,
-          reflect=reflect )
+               reflect=reflect )
   )
 }
 

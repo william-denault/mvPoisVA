@@ -21,7 +21,7 @@ Pois_fSuSiE <- function(Y,
                                                   eps = 1e-6,
                                                   numiter.em = 4
                             ),
-                            thresh_lowcount=0,
+                            thresh_lowcount=1e-2,
                             prior_mv=  "mixture_normal_per_scale",
                             gridmult=sqrt(2),
                             nullweight.mrash=10,
