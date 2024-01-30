@@ -126,7 +126,7 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
                                     s        = rep( 1, prod (dim(Y_c))),
                                     beta     = beta_pois,
                                     sigma2   = sigma2_pois,
-                                    maxiter  =  100,
+                                    maxiter  =  50,
                                     tol      = tol,
                                     method   = 'newton')
 
@@ -196,7 +196,8 @@ fit_latent_nugget<- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
   Y_c <- Y[complete.cases(Y),]
 
 
-  Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)pois_smooth_split(Y[i,])$Emu ))
+ # Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)pois_smooth_split(Y[i,])$Emu ))
+  Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)smashrgen:::ebps(Y[i,])$posterior$mean))
 
   out <- matrix(NA, ncol=ncol(Y), nrow = nrow(Y))
   out [complete.cases(Y),] <- Mu_pm

@@ -149,7 +149,7 @@ acc_Pois_fSuSiE <- function(Y,
     }
   }else{
 
-    Mu_pm <-fit_latent_nugget(Y)$Y
+    Mu_pm <- (fit_latent_nugget(Y)$Y)
   }
 
 

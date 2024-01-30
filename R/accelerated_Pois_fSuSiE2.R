@@ -22,8 +22,8 @@ acc_Pois_fSuSiE2 <- function(Y,
                                                   eps = 1e-6,
                                                   numiter.em = 4
                             ),
-                            thresh_lowcount=0,
-                            prior_mv=  "mixture_normal_per_scale",
+                            thresh_lowcount= 1e-2,
+                            prior_mv=  "mixture_normal",
                             gridmult=sqrt(2),
                             nullweight.mrash=10,
                             init_pi0_w.mrash=10,
@@ -41,6 +41,7 @@ acc_Pois_fSuSiE2 <- function(Y,
                             max_step_EM    = 1,
                             cor_small=TRUE,
                             post_processing="HMM"
+
 )
 {
   ####Changer les calcul d'objective -----
@@ -107,61 +108,15 @@ acc_Pois_fSuSiE2 <- function(Y,
   iter=1
   beta_pois <- 0* c(log(Mu_pm +1))
   check <- 3*tol
-
+  sigma2_pois=0.1
   ##### Poisson Part ----
-
-
-
   if (!nugget){
+    tt <-vebpm:::pois_mean_split(c(Y))
 
-
-    list_mu <- list()
-    for (i in 1: nrow(Y)){
-      Mu_pm<- 0*Y[i,]
-      iter=1
-      while(  iter <50 ){#check >tol &
-
-        init_val_pois<- c(log(Y[i,]+1))
-        beta_pois <- c(Mu_pm )
-        sigma2_pois=1
-        opt_Poisson  <- vga_pois_solver(init_val = init_val_pois ,
-                                        x        = c(Y[i,]),
-                                        s        = rep( 1, ncol ( (Y))),
-                                        beta     = beta_pois ,
-                                        sigma2   = sigma2_pois,
-                                        maxiter  = 50,
-                                        tol      = tol,
-                                        method   = 'newton')
-
-
-
-        Mu_pm <- matrix(opt_Poisson$m,byrow = FALSE, ncol=ncol(Y))
-
-
-
-      #  if(verbose){
-      #    print( paste('Posterior log intensity computed for iter ',iter))
-      #  }
-
-
-        tt <-  ashr::ash(opt_Poisson$m,opt_Poisson$v)
-
-        resid <- Mu_pm -matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
-        #not correct to work on later
-        sigma2_pois <- var(c(resid ))
-        #print(sigma2_pois)
-        Mu_pm <- matrix( tt$result$PosteriorMean,byrow = FALSE, ncol=ncol(Y))
-        iter=iter+1
-
-        # plot(  Mu_pm,Y)
-      }
-      list_mu[[i]] <-  Mu_pm
-    }
-
-    Mu_pm <-do.call(   rbind, list_mu )
+    Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
   }else{
 
-    Mu_pm <-fit_latent_nugget(Y)$Y
+    Mu_pm <- (fit_latent_nugget(Y)$Y)
   }
 
 
@@ -277,7 +232,7 @@ acc_Pois_fSuSiE2 <- function(Y,
     print(sum(is.na (tmp_Mu_pm_fm )))
 
     susiF.obj     <- susiF (
-      Y               =  tmp_Mu_pm_fm ,
+      Y               = tmp_Mu_pm_fm ,
       X               = X,
       L               = L,
       tol             = tol,
@@ -289,7 +244,8 @@ acc_Pois_fSuSiE2 <- function(Y,
       min.purity      = min.purity,
       maxit           = maxit.fsusie ,
       cor_small       = cor_small,
-      post_processing =post_processing)
+      post_processing = post_processing,
+      thresh_lowcount = thresh_lowcount)
 
 
 
