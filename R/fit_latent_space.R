@@ -116,7 +116,7 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
   ##### Poisson Part ----
   sigma2_pois=0.1
 
-  while(  iter <50  ){#check >tol &
+  while(  iter <20  ){#check >tol &
 
     init_val_pois<- c(log(Y_c+1))
     beta_pois <- c(Mu_pm)
@@ -169,7 +169,9 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
 
 
 
-fit_latent_nugget<- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
+fit_latent_nugget<- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE,
+                             est_sigma2=NULL
+                             ){
   ##initiatilzation -----
 
   J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
@@ -197,7 +199,8 @@ fit_latent_nugget<- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
 
 
  # Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)pois_smooth_split(Y[i,])$Emu ))
-  Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)smashrgen:::ebps(Y[i,])$posterior$mean))
+  Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)smashrgen:::ebps(Y[i,]
+                                                                          )$posterior$mean))
 
   out <- matrix(NA, ncol=ncol(Y), nrow = nrow(Y))
   out [complete.cases(Y),] <- Mu_pm

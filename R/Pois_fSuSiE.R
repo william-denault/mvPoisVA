@@ -39,7 +39,8 @@ Pois_fSuSiE <- function(Y,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
                             cor_small=TRUE,
-                            max.iter=3
+                            max.iter=3,
+                        nugget=FALSE
 )
 {
   ####Changer les calcul d'objective -----
@@ -106,23 +107,22 @@ Pois_fSuSiE <- function(Y,
   iter=1
   beta_pois <- 0* c(log(Mu_pm +1))
   check <- 3*tol
+  sigma2_pois=1
+  Mu_pm_init <- log(Mu_pm+1)
   while( check >tol & iter <max.iter ){
 
-    init_val_pois<- c(log(Y+1))
-    beta_pois <- c(Mu_pm)
-    sigma2_pois=1
-    opt_Poisson  <- vga_pois_solver(init_val = init_val_pois ,
-                                    x        = c(Y),
-                                    s        = rep( 1, prod (dim(Y))),
-                                    beta     = beta_pois,
-                                    sigma2   = sigma2_pois,
-                                    maxiter  = 50,
-                                    tol      = tol,
-                                    method   = 'newton')
 
 
+    if (!nugget){
+      tt <-vebpm:::pois_mean_split(c(Y),mu_pm_init= c(Mu_pm_init),
+                                   est_sigma2 = sigma2_pois )
 
-    Mu_pm <- matrix(opt_Poisson$m,byrow = FALSE, ncol=ncol(Y))
+      Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
+      Mu_pv <- matrix( tt$posterior$var_log,byrow = FALSE, ncol=ncol(Y))
+    }else{
+
+      Mu_pm <- (fit_latent_nugget(Y)$Y)
+    }
 
 
 
@@ -131,7 +131,7 @@ Pois_fSuSiE <- function(Y,
     }
 
 
-    Mu_pv <- matrix(opt_Poisson$v,byrow = FALSE, ncol=ncol(Y))
+
 
     b_pm <- 0* Mu_pm
     fm_pm <- 0* Mu_pm
@@ -285,7 +285,7 @@ print(sum(is.na (tmp_Mu_pm_fm )))
     sigma2_pois <- var(c(resid ))
     #print(sigma2_pois)
     Mu_pm <- mat_mean +fm_pm+b_pm#update
-
+    Mu_pm_init <-Mu_pm
     print(    susiF.obj$cs)
     iter=iter+1
     ##include mr.ash
