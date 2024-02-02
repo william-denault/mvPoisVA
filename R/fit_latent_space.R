@@ -200,7 +200,7 @@ fit_latent_nugget<- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE,
 
  # Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)pois_smooth_split(Y[i,])$Emu ))
   Mu_pm <-do.call(rbind, lapply(1:nrow(Y_c), function (i)smashrgen:::ebps(Y[i,]
-                                                                          )$posterior$mean))
+                                                                          )$posterior$mean_log))
 
   out <- matrix(NA, ncol=ncol(Y), nrow = nrow(Y))
   out [complete.cases(Y),] <- Mu_pm
