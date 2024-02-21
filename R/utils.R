@@ -12,8 +12,8 @@ HFT<- function(count.data){
 
 
 #' @param x a vector of count of length of 2^S
-#' @param indx_list a list generated susiF.alpha::gen_wavelet_indx
-#' sort intensity in the same order than wavelthresh package, allow use of susiF.alpha routines
+#' @param indx_list a list generated fsusieR::gen_wavelet_indx
+#' sort intensity in the same order than wavelthresh package, allow use of fsusieR routines
 get_empirical_intensity <- function(x,indx_lst)
 {
 

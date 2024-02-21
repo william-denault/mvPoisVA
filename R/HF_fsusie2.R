@@ -227,7 +227,7 @@ HF_susiF2 <- function(Y,
 
 
   #preparing output
-  susiF.obj <- susiF.alpha::update_cal_pip(susiF.obj)
+  susiF.obj <- fsusieR::update_cal_pip(susiF.obj)
   out <-  susiF.obj
   return(  out)
 }

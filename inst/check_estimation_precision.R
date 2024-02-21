@@ -2,6 +2,7 @@ rm(list=ls())
 library(mvPoisVA)
 library(susiF.alpha)
 library(susieR)
+library(ebnm)
 data(N3finemapping)
 mysd=1
 N =100
@@ -16,7 +17,9 @@ x = rpois(n,exp(log(mu)+rnorm(n,sd=sigma)))
 idx <- which( apply( genotype,2, var ) <1e-15)
 genotype <- genotype [, -idx]
 
-
+fit = pois_smooth_split(x,maxiter=30)
+plot(x,col='grey80')
+  lines(exp(fit$Eb))
 count.data  <- list()
 L <-  1#actual number of effect
 
@@ -32,7 +35,7 @@ noise_data <- list()
 for ( i in 1:N){
 
   predictor <-   0.1*(DJ.EX(n=2^7)[[4]]) *X[i,true_pos] +rnorm(length(lf[[1]]), sd=1)
-  #predictor <-  mu *X[i,true_pos] +rnorm(length(lf[[1]]), sd=1 )
+   predictor <-  mu *X[i,true_pos] +rnorm(length(lf[[1]]), sd=1 )
 
   noise_data[[i]]<- rpois(n, lambda=exp (predictor) )
 }
@@ -46,7 +49,7 @@ out2$cs
 
 plot( mu)
 lines (out2$fitted_func[[1]])
-lines(  exp(2)*out$susiF.obj$fitted_func[[1]],col="green" )
+lines(   out$susiF.obj$fitted_func[[1]],col="green" )
 
 plot( 0.051*(DJ.EX(n=2^7)[[4]]))
 lines (out2$fitted_func[[1]])

@@ -141,7 +141,7 @@ binomial_mean_splitting = function(x,nb=1,
 #  idx_out <- tl[[1]]$idx #### indx of interest at the end
 #}
 #
-#indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
+#indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
 #
 #tl <-  lapply(1:nrow(Y), function(i)
 # get_empirical_intensity(Y[i,],

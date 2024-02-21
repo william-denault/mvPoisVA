@@ -3,7 +3,7 @@
 #'
 #' @examples
 #'library(mvPoisVA)
-#'library(susiF.alpha)
+#'library(fsusieR)
 #'library(susieR)
 #'data(N3finemapping)
 #'X <- N3finemapping$X
@@ -97,7 +97,7 @@ fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
   #### to avoid 0 in Y_min to correct at the end
 
 
-  indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
+  indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
 
 
 
@@ -185,7 +185,7 @@ fit_latent_nugget<- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE,
   #### to avoid 0 in Y_min to correct at the end
 
 
-  indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
+  indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
 
 
 

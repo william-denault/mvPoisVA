@@ -273,7 +273,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
   Y    <- HFT(Y)
   W <- list(D= Y[,-ncol(Y)], C=Y[, ncol(Y)])
   # centering and scaling covariate
-  X <- susiF.alpha::colScale(X)
+  X <- fsusieR::colScale(X)
   # centering input
 
   Y_f      <-  cbind( W$D,W$C)
@@ -321,7 +321,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
 
 
   if (fit_approach %in% c("both", "penalized")){
-    temp <- susiF.alpha:: init_prior(Y              = Y_f,
+    temp <- fsusieR:: init_prior(Y              = Y_f,
                                      X              = Z ,
                                      prior          = prior  ,
                                      v1             = v1,
@@ -335,14 +335,14 @@ HF_susiF <- function(Y, X, Z, L = 2,
 
 
     #Recycled for the first step of the while loop
-    EBmvFR.obj   <-  susiF.alpha::init_EBmvFR_obj(G_prior = G_prior,
+    EBmvFR.obj   <-  fsusieR::init_EBmvFR_obj(G_prior = G_prior,
                                                   Y       = Y_f,
                                                   X       = Z
     )
     print('Done initializing EBmvFR.obj')
   }
   if(fit_approach %in%c("both","fine_mapping")){
-    temp <- susiF.alpha::init_prior( Y               = Y_f,
+    temp <- fsusieR::init_prior( Y               = Y_f,
                                      X              = X ,
                                      prior          = prior ,
                                      v1             = v1,
@@ -357,7 +357,7 @@ HF_susiF <- function(Y, X, Z, L = 2,
 
 
     #Recycled for the first step of the while loop
-    susiF.obj   <-  susiF.alpha::init_susiF_obj(L_max   = L,
+    susiF.obj   <-  fsusieR::init_susiF_obj(L_max   = L,
                                                 G_prior = G_prior,
                                                 Y       = Y_f,
                                                 X       = X,
@@ -391,7 +391,7 @@ print(fit_approach)
 
   if(fit_approach%in% c("both", "penalized")){
 
-    EBmvFR.obj   <- susiF.alpha::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
+    EBmvFR.obj   <- fsusieR::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
                                                   W              = W,
                                                   X              = Z,
                                                   tol            = tol.mrash,
@@ -432,7 +432,7 @@ print(fit_approach)
                                    cor_small      = cor_small,
                                    is.pois        = TRUE)
 print(str(Y))
-  susiF.obj <- susiF.alpha:: out_prep(obj           = susiF.obj,
+  susiF.obj <- fsusieR:: out_prep(obj           = susiF.obj,
                         Y             = Y,
                         X             = X,
                         indx_lst      = indx_lst,

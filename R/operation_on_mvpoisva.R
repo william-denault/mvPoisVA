@@ -4,7 +4,7 @@ out_prep_mvpoisva <- function( Mu_pm=Mu_pm,
                           EBmvFR.obj=EBmvFR.obj)
 {
  out <- list(cs= susiF.obj$cs,
-             pip= susiF.alpha:::update_cal_pip( susiF.obj)$pip)
+             pip= fsusieR:::update_cal_pip( susiF.obj)$pip)
 
  return(out)
 }

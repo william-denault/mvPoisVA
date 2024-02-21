@@ -80,7 +80,7 @@ acc_Pois_fSuSiE2 <- function(Y,
       warning(paste("Some of the columns of X are constants, we removed" ,length(tidx), "columns"))
       X <- X[,-tidx]
     }
-    X <- susiF.alpha:::colScale(X)
+    X <- fsusieR:::colScale(X)
   }
   if(fit_approach %in% c('both',"penalized")){
     tidx <- which(apply(Z,2,var)==0)
@@ -88,14 +88,14 @@ acc_Pois_fSuSiE2 <- function(Y,
       warning(paste("Some of the columns of Z are constants, we removed" ,length(tidx), "columns"))
       Z <- Z[,-tidx]
     }
-    Z <- susiF.alpha:::colScale(Z)
+    Z <- fsusieR:::colScale(Z)
   }
 
-  indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
+  indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
 
 
 
-  X <- susiF.alpha:::colScale(X)
+  X <- fsusieR:::colScale(X)
 
 
 
@@ -126,13 +126,13 @@ acc_Pois_fSuSiE2 <- function(Y,
 
   if(init){
 
-    tmp_Mu_pm <- susiF.alpha::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
+    tmp_Mu_pm <- fsusieR::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
     lowc_wc <-  which_lowcount(tmp_Mu_pm,
                                thresh_lowcount=thresh_lowcount)
     W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
                C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
     if (fit_approach %in% c("both", "penalized")){
-      temp <- susiF.alpha:: init_prior(Y              = tmp_Mu_pm,
+      temp <- fsusieR:: init_prior(Y              = tmp_Mu_pm,
                                        X              = Z ,
                                        prior          = prior_mv ,
                                        v1             = v1,
@@ -145,7 +145,7 @@ acc_Pois_fSuSiE2 <- function(Y,
 
 
       #Recycled for the first step of the while loop
-      EBmvFR.obj   <-  susiF.alpha::init_EBmvFR_obj(G_prior = G_prior,
+      EBmvFR.obj   <-  fsusieR::init_EBmvFR_obj(G_prior = G_prior,
                                                     Y       = Y,
                                                     X       = Z
       )
@@ -153,7 +153,7 @@ acc_Pois_fSuSiE2 <- function(Y,
     }
     if(fit_approach %in%c("both","fine_mapping")){
 
-      temp <- susiF.alpha:: init_prior(Y              = tmp_Mu_pm,
+      temp <- fsusieR:: init_prior(Y              = tmp_Mu_pm,
                                        X              = X ,
                                        prior          = prior_mv ,
                                        v1             = v1,
@@ -166,7 +166,7 @@ acc_Pois_fSuSiE2 <- function(Y,
 
 
       #Recycled for the first step of the while loop
-      susiF.obj   <-  susiF.alpha::init_susiF_obj(L_max   = L,
+      susiF.obj   <-  fsusieR::init_susiF_obj(L_max   = L,
                                                   G_prior = G_prior,
                                                   Y       = tmp_Mu_pm,
                                                   X       = X,
@@ -187,13 +187,13 @@ acc_Pois_fSuSiE2 <- function(Y,
     tmp_Mu_pm_pen <- Mu_pm  -  fm_pm#potentially run smash on colmean
 
     t_mean_EBmvFR <-  apply(tmp_Mu_pm_pen,2, mean )
-    tmp_Mu_pm_pen <- susiF.alpha::colScale(tmp_Mu_pm_pen, scale=FALSE)
+    tmp_Mu_pm_pen <- fsusieR::colScale(tmp_Mu_pm_pen, scale=FALSE)
     W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_pen )],
                C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_pen )])
 
 
     ### TODO: Maybe use better restarting point for EBmvFR.obj
-    EBmvFR.obj   <- susiF.alpha::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
+    EBmvFR.obj   <- fsusieR::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
                                                   W              = W,
                                                   X              = Z,
                                                   tol            = tol.mrash,
@@ -226,7 +226,7 @@ acc_Pois_fSuSiE2 <- function(Y,
 
     t_mean_susiF <-  apply(tmp_Mu_pm_fm,2, mean )
 
-    tmp_Mu_pm_fm <- susiF.alpha::colScale(tmp_Mu_pm_fm, scale=FALSE)
+    tmp_Mu_pm_fm <- fsusieR::colScale(tmp_Mu_pm_fm, scale=FALSE)
     W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_fm )],
                C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
     print(sum(is.na (tmp_Mu_pm_fm )))
@@ -283,7 +283,7 @@ acc_Pois_fSuSiE2 <- function(Y,
 
   if( fit_approach ==   "both" )
   {
-    susiF.obj <- susiF.alpha::update_cal_pip(susiF.obj)
+    susiF.obj <- fsusieR::update_cal_pip(susiF.obj)
     out <- list( Mu_pm=Mu_pm,
                  susiF.obj=susiF.obj,
                  EBmvFR.obj=EBmvFR.obj,
@@ -292,7 +292,7 @@ acc_Pois_fSuSiE2 <- function(Y,
 
   if( fit_approach ==   "fine_mapping" )
   {
-    susiF.obj <- susiF.alpha::update_cal_pip(susiF.obj)
+    susiF.obj <- fsusieR::update_cal_pip(susiF.obj)
     out <- list( Mu_pm=Mu_pm,
                  susiF.obj=susiF.obj,
                  fitted = tt_all[,idx_out]  )

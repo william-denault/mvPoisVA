@@ -9,7 +9,7 @@ sim_intenisty <- function( lev_res=7,
   {
     pi0 <- 1-exp(- (  prop_decay*(1:lev_res)))
   }
-  temp <- susiF.alpha::simu_IBSS_per_level ( lev_res=lev_res,
+  temp <- fsusieR::simu_IBSS_per_level ( lev_res=lev_res,
                                              length_grid= length_grid,
                                              pi0=pi0,
                                              alpha=alpha,
