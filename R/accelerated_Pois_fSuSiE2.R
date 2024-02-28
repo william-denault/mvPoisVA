@@ -109,9 +109,11 @@ acc_Pois_fSuSiE2 <- function(Y,
   beta_pois <- 0* c(log(Mu_pm +1))
   check <- 3*tol
   sigma2_pois=0.1
+  Mu_pm_init <- log(Mu_pm+1)
   ##### Poisson Part ----
   if (!nugget){
-    tt <-vebpm:::pois_mean_split(c(Y))
+    tt <-vebpm:::pois_mean_split(c(Y),
+                                  mu_pm_init= c(Mu_pm_init))
 
     Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
   }else{
@@ -129,6 +131,13 @@ acc_Pois_fSuSiE2 <- function(Y,
     tmp_Mu_pm <- fsusieR::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
     lowc_wc <-  which_lowcount(tmp_Mu_pm,
                                thresh_lowcount=thresh_lowcount)
+
+    if( length(lowc_wc) > (ncol(tmp_Mu_pm)-10)){
+      out <-NULL
+
+      return(out)
+    }
+
     W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
                C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
     if (fit_approach %in% c("both", "penalized")){

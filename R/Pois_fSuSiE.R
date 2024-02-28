@@ -144,6 +144,14 @@ print("here1")
       tmp_Mu_pm <- fsusieR::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
       lowc_wc <-  which_lowcount(tmp_Mu_pm,
                                  thresh_lowcount=thresh_lowcount)
+
+      if( length(lowc_wc) > (ncol(tmp_Mu_pm)-10)){
+        out <-NULL
+
+        return(out)
+      }
+
+
       W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
       if (fit_approach %in% c("both", "penalized")){
@@ -171,7 +179,7 @@ print("here1")
         temp <- fsusieR:: init_prior(Y              = tmp_Mu_pm,
                                          X              = X ,
                                          prior          = prior_mv ,
-                                         v1             = v1,
+
                                          indx_lst       = indx_lst,
                                          lowc_wc        = lowc_wc,
                                          control_mixsqp = control_mixsqp,
