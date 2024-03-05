@@ -112,7 +112,7 @@ acc_Pois_fSuSiE2 <- function(Y,
   Mu_pm_init <- log(Mu_pm+1)
   ##### Poisson Part ----
   if (!nugget){
-    tt <-vebpm:::pois_mean_split(c(Y),
+    tt <- pois_mean_split(c(Y),
                                   mu_pm_init= c(Mu_pm_init))
 
     Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
