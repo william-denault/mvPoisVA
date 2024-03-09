@@ -114,7 +114,7 @@ Pois_fSuSiE <- function(Y,
 
 
     if (!nugget){
-      tt <-vebpm:::pois_mean_split(c(Y),mu_pm_init= c(Mu_pm_init),
+      tt <- pois_mean_split(c(Y),mu_pm_init= c(Mu_pm_init),
                                    est_sigma2 = sigma2_pois )
 
       Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))

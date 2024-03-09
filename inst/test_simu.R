@@ -1,6 +1,6 @@
 rm(list=ls())
 library(mvPoisVA)
-library(susiF.alpha)
+library(fsusieR)
 library(susieR)
 data(N3finemapping)
 X <- N3finemapping$X
@@ -84,7 +84,7 @@ for (o  in (length(res)+1):10000) {
   Y <- count.data
 
 
-  res3 <- acc_Pois_fSuSiE(Y=Y,X=X, L=3)
+  res3 <- acc_Pois_fSuSiE2(Y=Y,X=X, L=3)
   res0 <-susiF (Y=log(Y+1),X=X, L=3)
   #res1 <- mv_Poisproc_reg (Y=Y,X=X, L=3)
 
