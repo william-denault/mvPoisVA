@@ -231,7 +231,7 @@ mv_Poisproc_reg <- function(Y,
 
 
       ### TODO: Maybe use better restarting point for EBmvFR.obj
-      EBmvFR.obj   <- fsusieR::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
+      EBmvFR.obj   <- fsusieR::EBmvFR.workhorse( obj     = EBmvFR.obj,
                                                     W              = W,
                                                     X              = Z,
                                                     tol            = tol.mrash,
@@ -268,7 +268,7 @@ mv_Poisproc_reg <- function(Y,
       W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_fm )],
                  C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
 
-      susiF.obj     <- susiF.workhorse(susiF.obj      = susiF.obj,
+      susiF.obj     <- susiF.workhorse( obj      = susiF.obj,
                                        W              = W,
                                        X              = X,
                                        tol            = tol,

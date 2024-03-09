@@ -216,7 +216,7 @@ print("here1")
 
 
       ### TODO: Maybe use better restarting point for EBmvFR.obj
-      EBmvFR.obj   <- fsusieR::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
+      EBmvFR.obj   <- fsusieR::EBmvFR.workhorse( obj     = EBmvFR.obj,
                                                     W              = W,
                                                     X              = Z,
                                                     tol            = tol.mrash,
