@@ -1,0 +1,112 @@
+rm(list=ls())
+library(mvPoisVA)
+library(susiF.alpha)
+library(susieR)
+data(N3finemapping)
+X <- N3finemapping$X
+mysd=1
+N =300
+genotype <-X[1:N,1:500]
+
+idx <- which( apply( genotype,2, var ) <1e-15)
+genotype <- genotype [, -idx]
+library(gplots)#
+
+if(file.exists("/home/wdenault/benchmark_mvPois/comparison_mvPois_fusie_gFSuSiE.RData")){
+  load("/home/wdenault/benchmark_mvPois/comparison_mvPois_fusie_gFSuSiE.RData")
+  
+}else{
+  res <-list()
+}
+lev_res =7
+for (o  in (length(res)+1):10000) {
+  
+  
+  count.data  <- list()
+  L <-  sample(1:5, size =1)#actual number of effect
+  
+  lf <-  list()
+  for(l in 1:L){
+    lf[[l]] <-log(abs(0.1*sim_intenisty(lev_res )$sim_intens) )#functional effect for effect l
+  }
+  
+  
+  
+  
+  data(N3finemapping)
+  X <- N3finemapping$X
+  genotype <-X[sample(1:nrow(X), size=N),]
+  
+  idx <- which( apply( genotype,2, var ) <1e-15)
+  if( length(idx)==0){
+    X <-genotype
+    
+    Rtrue <- cor (genotype )
+  }else{
+    genotype <- genotype [, -idx]
+    X <-genotype
+    
+  }
+  G<- genotype
+  X <- (X -0.99*min(X))/(0.5*max(X ))
+  
+  G <-  (G -0.99*min(G ))/(0.5*max(G ))
+  
+  tpos <- sample(1:ncol(genotype), replace = FALSE,size=2)
+  true_pos <- tpos
+  pos1 <- tpos[1]
+  pos2 <- tpos[2]
+  if( length(which(apply(G,2,var)==0))>0){
+    G <- G[,-which(apply(G,2,var)==0)]
+  }
+  # G <- matrix( rnorm(nrow(genotype)*300), nrow = nrow(genotype))
+  
+  
+  predictor <-rep (0, length(lf[[1]] ))
+  count.data  <- list()
+  for ( i in 1:N)
+  {
+    
+    predictor <-rep (0, length(lf[[1]] ))
+    
+    for ( l in 1:L){
+      predictor <-predictor + G[i, true_pos[l]]*lf[[l]]
+    }
+    predictor <- exp(predictor+ rnorm(  length(lf[[1]]), sd=mysd))
+    
+    count.data [[i]] <-   rpois(n= length(lf[[1]]) ,
+                                lambda =predictor  )
+    
+  }
+  count.data <- do.call(rbind, count.data)
+  
+  
+  
+  Y <- count.data
+  res0 <-susiF (Y=Y,X=X, L=5,post_processing ="none" )
+  res01 <-HF_susiF  (Y=Y,X=X, L=5  )
+  
+  res1 <- mv_Poisproc_reg (Y=Y,X=X, L=5, max.iter=5 )
+  
+  res2 <- Pois_fSuSiE (Y=Y,X=X, L=5, max.iter=5 )
+  
+  res3 <- acc_Pois_fSuSiE(Y=Y,X=X, L=5 )
+  out <-  list( mv_POIS = res1$susiF.obj$pip,
+                mv_POIS_cs= res1$susiF.obj$cs,
+                susiF_pip= res0$pip,
+                susiF_cs= res0$cs,
+                
+                HF_susiF_pip= res01$pip,
+                HF_susiF_cs= res01$cs,
+                
+                
+                g_susiF=res2$susiF.obj$pip,
+                g_susiF_cs=res2$susiF.obj$cs,
+                
+                acc_g_susiF=res3$susiF.obj$pip,
+                acc_g_susiF_cs=res3$susiF.obj$cs,
+                true_pos=true_pos)
+  res[[o]] <- out
+  save(res, file="/home/wdenault/benchmark_mvPois/comparison_mvPois_fusie_gFSuSiE.RData")
+  
+}

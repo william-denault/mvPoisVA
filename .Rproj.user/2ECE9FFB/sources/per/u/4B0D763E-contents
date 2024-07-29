@@ -1,0 +1,48 @@
+tt <- res[[1]]
+plot( tt$g_susiF ,
+      tt$acc_g_susiF
+      )
+tt$acc_g_susiF[tt$true_pos]
+tt$g_susiF[tt$true_pos]
+tt$susiF_pip[tt$true_pos]
+tt <- res[[2]]
+points( tt$g_susiF ,
+      tt$acc_g_susiF
+)
+tt$acc_g_susiF[tt$true_pos]
+tt$g_susiF[tt$true_pos]
+tt$susiF_pip[tt$true_pos]
+tt <- res[[3]]
+points( tt$g_susiF ,
+      tt$acc_g_susiF
+)
+tt$acc_g_susiF[tt$true_pos]
+tt$g_susiF[tt$true_pos]
+tt$susiF_pip[tt$true_pos]
+
+
+
+
+
+
+tt <- res[[4]]
+plot( tt$g_susiF ,
+      tt$acc_g_susiF
+)
+tt$acc_g_susiF[tt$true_pos]
+tt$g_susiF[tt$true_pos]
+tt$susiF_pip[tt$true_pos]
+tt <- res[[5]]
+points( tt$g_susiF ,
+        tt$acc_g_susiF
+)
+tt$acc_g_susiF[tt$true_pos]
+tt$g_susiF[tt$true_pos]
+tt$susiF_pip[tt$true_pos]
+tt <- res[[6]]
+points( tt$g_susiF ,
+        tt$acc_g_susiF
+)
+tt$acc_g_susiF[tt$true_pos]
+tt$g_susiF[tt$true_pos]
+tt$susiF_pip[tt$true_pos]

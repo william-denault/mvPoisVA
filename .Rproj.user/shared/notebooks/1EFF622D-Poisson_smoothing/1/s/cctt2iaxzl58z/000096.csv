@@ -1,0 +1,1 @@
+"0","lines(fit_ebps$posterior$mean_smooth, col= ""orange2"", lwd=1.5)"

@@ -1,0 +1,12 @@
+s = NULL 
+Eb_init = NULL 
+sigma2_init = NULL 
+est_sigma2 = TRUE 
+maxiter = 100 
+tol=1e-5 
+filter.number = 1 
+family = 'DaubExPhase' 
+verbose=FALSE 
+printevery = 10 
+ebnm_params=list(mode=0) 
+optim_method='L-BFGS-B'

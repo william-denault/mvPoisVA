@@ -1,0 +1,19 @@
+n = 1024
+mu = rnorm(n)
+x = rpois(n,exp(mu))
+res <- pois_mean_GMGM(x)
+
+res1 <-pois_mean_penalized_inversion(x)
+res2 <- pois_mean_penalized_compound(x)
+library( mvPoisVA)
+out <- fit_latent_space(rbind(x,x,x,x))
+ plot(out$Y[1,], res$posterior$mean_log)
+ 
+ plot(out$Y[1,], res1 $posterior$mean_log)
+ abline(a=0,b=1)
+ 
+ plot(out$Y[1,], res2 $posterior$mean_log)
+ 
+ abline(a=0,b=1)
+
+           

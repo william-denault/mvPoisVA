@@ -39,7 +39,7 @@
 #' @param cov_lev numeric between 0 and 1, corresponding to the
 #' expected level of coverage of the cs if not specified set to 0.95
 #'
-#' @param min.purity minimum purity for estimated credible sets
+#' @param min_purity minimum purity for estimated credible sets
 #' @param filter.cs logical, if TRUE filter the credible set (removing low purity
 #' cs and cs with estimated prior equal to 0). Set as TRUE by default.
 #' @param init_pi0_w starting value of weight on null compoenent in mixsqp
@@ -188,7 +188,7 @@ HF_susiF2 <- function(Y,
                      nullweight.mrash=10,
                      init_pi0_w.mrash=10,
                      cov_lev=0.95,
-                     min.purity     =0.5,
+                     min_purity     =0.5,
                      greedy=TRUE,
                      backfit=TRUE,
                      tol.mrash=1e-3,
@@ -218,7 +218,7 @@ HF_susiF2 <- function(Y,
     cal_obj         = cal_obj.fsusie,
     verbose         = verbose,
     cov_lev         = cov_lev,
-    min.purity      = min.purity,
+    min_purity      = min_purity,
     maxit           = maxit.fsusie ,
     cor_small       = cor_small,
     post_processing =post_processing)

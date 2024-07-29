@@ -1,0 +1,15 @@
+library(mvPoisVA)
+library(ebnm)
+set.seed(12345)
+n=2^9
+sigma=0.5
+mu=c(rep(0.3,n/4), rep(3, n/4), rep(10, n/4), rep(0.3, n/4))
+x = rpois(n,exp(log(mu)+rnorm(n,sd=sigma)))
+fit = pois_smooth_split(x,maxiter=30)
+plot(x,col='grey80')
+lines(exp(fit$Eb))
+lines(exp(fit$Emu))
+
+lines (mu)
+fit$sigma2
+plot(fit$obj)

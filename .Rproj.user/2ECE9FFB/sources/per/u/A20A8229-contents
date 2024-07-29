@@ -1,0 +1,48 @@
+true_lab <- do.call( c,
+                     lapply(1: length(res),
+                            
+                            function( i) {
+                              
+                              a <-  rep( 0,   length(res[[i]]$susiF_pip))
+                              a[res[[i]]$true_pos] <- 1
+                              return(a)
+                            }
+                            
+                     )
+)
+
+score_fsusie <-  do.call( c, lapply( 1: length(res),
+                                     function( i) res[[i]]$susiF_pip))
+
+score_gsusie <-  do.call( c, lapply( 1: length(res),
+                                     function( i) res[[i]]$g_susiF))
+score_mvPsusie <-  do.call( c, lapply( 1: length(res),
+                                       function( i) res[[i]]$mv_POIS))
+simple_roc <- function(labs, scores){
+  labs <- labs[order(scores, decreasing=TRUE)]
+  data.frame(TPR=cumsum(labs)/sum(labs), FPR=cumsum(!labs)/sum(!labs), labs)
+}
+
+
+
+roc_fsusie <- simple_roc(true_lab, score_fsusie)
+roc_mvPsusie <- simple_roc(true_lab, score_mvPsusie)
+roc_gsusie <- simple_roc(true_lab, score_gsusie)
+
+
+df_roc <- data.frame (FDR  =c( roc_fsusie$FPR, roc_mvPsusie$FPR, roc_gsusie$FPR),
+                      Power = c( roc_fsusie$TPR, roc_mvPsusie$TPR, roc_gsusie$TPR),
+                      method= factor ( c(rep("fSuSIE"  , length(roc_fsusie$FPR)),
+                                         rep("mvPSuSIE", length(roc_mvPsusie$FPR )),
+                                         rep("gSuSIE"  , length(roc_gsusie$FPR  ))
+                      )
+                      )
+)
+
+library(ggplot2)
+P1 <- ggplot(df_roc, aes (x=FDR, y=Power,col=method))+
+  geom_line()+
+  xlim( c(0,0.05))+ 
+ 
+  ggtitle("Gaussian functional effect ")
+P1

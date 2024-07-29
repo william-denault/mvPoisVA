@@ -1,0 +1,55 @@
+---
+title: "Poisson_smoothing"
+author: "William R.P. Denault"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Smoothing count via split-VA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Generate data
+
+
+```{r generate_data}
+library(mvPoisVA)
+library(fsusieR)
+library(susieR)
+#example from Dongyue Xie work
+ set.seed(12345)
+ n=2^9
+ sigma=0.5
+ mu=c(rep(0.3,n/4), rep(3, n/4), rep(10, n/4), rep(0.3, n/4))
+  plot(mu, type="l", main="Underlying intensity")
+
+```
+
+## Sampling from the underlying model and smoothing
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+set.seed(123)
+x = rpois(length(mu),exp(log(mu)+rnorm(n=length(mu),sd=mysd)))
+plot(mu, type="l", main="Underlying intensity")
+fit = pois_smooth_split(x,maxiter=30)
+fit_ebps = ebps(x)
+plot(x,col='grey80')
+lines(exp(fit$Eb), col= "blue3", lwd=1.5)
+lines( smashr::smash(haarfisz::hft(x))  , col="darkgreen", lwd=1.5)
+lines(fit_ebps$posterior$mean_smooth, col= "orange2", lwd=1.5)
+lines(mu, lwd=1.5) 
+legend(x="topleft", legend=c("Poisson smoothing", "EBPS", "Haar-Fisz", "True"), col=c("lightblue3", "orange2", "darkgreen", "black"), lwd=1.5)
+```
+
+
+```{r ,Estimated over-dispersion stansard deviation}
+sqrt(fit_ebps$fitted_g$sigma2)
+sqrt(fit$sigma2)
+```
+
