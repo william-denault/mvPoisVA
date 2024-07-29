@@ -22,7 +22,7 @@ df =data.frame( est=  c(est_ebps, est_smooth),
             method=rep(c("EBPS", "Poisson smoothing"),
                        each=length(est_smooth))
 )
-boxplot(est~method, data=d, main="Estimated over-dispersion standard deviation")
+boxplot(est~method, data=df, main="Estimated over-dispersion standard deviation")
 abline(h=sigma, col="red")
 
 
@@ -51,7 +51,7 @@ df =data.frame( est=  c(est_ebps, est_smooth),
                 method=rep(c("EBPS", "Poisson smoothing"),
                            each=length(est_smooth))
 )
-boxplot(est~method, data=d, main="Estimated over-dispersion standard deviation")
+boxplot(est~method, data=df, main="Estimated over-dispersion standard deviation")
 abline(h=sigma, col="red")
 
 
@@ -81,7 +81,7 @@ df =data.frame( est=  c(est_ebps, est_smooth),
                 method=rep(c("EBPS", "Poisson smoothing"),
                            each=length(est_smooth))
 )
-boxplot(est~method, data=d, main="Estimated over-dispersion standard deviation")
+boxplot(est~method, data=df, main="Estimated over-dispersion standard deviation")
 abline(h=sigma, col="red")
 
 
