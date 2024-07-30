@@ -25,10 +25,10 @@ for (o in 1:40){
 
   lf <-  list()
   lf[[1]]<- rep(0.1, 2^6)
-  lf[[1]][10:20] <-2
+  lf[[1]][10:20] <-5
 
   lf[[2]]<- rep(0.1, 2^6)
-  lf[[2]][50:60] <-3
+  lf[[2]][50:60] <-10
 
 
 
@@ -113,8 +113,8 @@ lf2_out <- do.call(rbind, lf2_fit)
 lf_out = lf1_out + lf2_out
 
 
-
-plot(lf[[1]]+lf[[2]], ylim= c( -0.2, 5) , col="red")
+lf_out = log(lf_out+1)
+plot(lf[[1]]+lf[[2]], ylim= c( -0.2, 12) , col="red")
 
 lines(apply(lf_out, 2, mean) +0.1, col="blue")
 
@@ -129,3 +129,4 @@ plot(lf[[2]], ylim= c( -0.2, 5) , col="red")
 for (o in 1: length(lf2_fit)){
   lines (lf2_fit[[o]], col="blue")
 }
+

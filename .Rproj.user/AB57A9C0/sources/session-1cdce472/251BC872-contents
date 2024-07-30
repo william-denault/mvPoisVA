@@ -58,5 +58,6 @@ plot( inv_lst[[1]], count.data[1,])
 
 res_HF <- HF_susiF2 (Y=count.data, X=G)
 lol1 <- mv_Poisproc_reg(Y=count.data, X=G)
-lol1
-res_HF
+lol1$susiF.obj$cs
+res_HF$cs
+
