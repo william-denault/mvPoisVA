@@ -35,7 +35,7 @@ You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
 set.seed(123)
-x = rpois(length(mu),exp(log(mu)+rnorm(n=length(mu),sd=mysd)))
+x = rpois(length(mu),exp(log(mu)+rnorm(n=length(mu),sd=sigma)))
 plot(mu, type="l", main="Underlying intensity")
 fit = pois_smooth_split(x,maxiter=30)
 fit_ebps = ebps(x)

@@ -1,3 +1,0 @@
-"0","set.seed(123)"
-"0","x = rpois(length(mu),exp(log(mu)+rnorm(n=length(mu),sd=mysd)))"
-"0","plot(mu, type=""l"", main=""Underlying intensity"")"

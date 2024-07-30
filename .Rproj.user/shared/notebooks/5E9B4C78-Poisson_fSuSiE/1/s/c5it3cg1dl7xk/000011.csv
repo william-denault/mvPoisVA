@@ -1,0 +1,2 @@
+"0",""
+"0","plot (lf[[2]], type=""l"", main=paste ( ""effect of SNP"",true_pos[2]))"
