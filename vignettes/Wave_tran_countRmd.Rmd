@@ -23,7 +23,7 @@ We first simulate some underlying intensity functions that we mix afterwards
 ```{r cars}
 library(ashr)
 library(wavethresh)
-library(susiF.alpha)
+library(fsusieR)
 library(mvPoisVA)
 
 set.seed(1)
@@ -90,7 +90,7 @@ if(reflect){
 Y <- Y+1
 
 
-indx_lst <-  susiF.alpha::gen_wavelet_indx(log2(ncol(Y)))
+indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
 ### Wavelet like transform -----
 tl <-  lapply(1:nrow(Y), function(i)
   get_empirical_intensity(Y[i,],
