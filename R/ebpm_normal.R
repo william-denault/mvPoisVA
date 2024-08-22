@@ -1,4 +1,4 @@
-C#copied from https://github.com/DongyueXie/vebpm/
+#copied from https://github.com/DongyueXie/vebpm/
 
 #'@title Solve Gaussian approximation to Poisson mean problem
 #'@description Gaussian prior, Gaussian posterior in Poisson mean problem.

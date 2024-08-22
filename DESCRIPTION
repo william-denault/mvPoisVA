@@ -3,15 +3,21 @@ Type: Package
 Title: Regression methods for inhomogeneous Poisson processes
 Version: 0.1.1.011
 Author: William R.P. Denault
-Maintainer: <wdenault@uchicago.edu>
-Description: Implementation of fSuSiE and Empirical Bayes penalized regression methods for inhomogeneous Poisson processes
+Maintainer: William R.P. Denault <wdenault@uchicago.edu>
+Description: Implementation of fSuSiE and Empirical Bayes penalized regression methods for inhomogeneous Poisson processes.
 Depends:
-  R (>= 3.1.0),
-  fastGHQuad,
-  fsusieR (>= 0.2.77),
-  haarfisz ,
-  ebnm
+    R (>= 3.1.0),
+    fastGHQuad,
+    fsusieR (>= 0.2.77),
+    haarfisz,
+    ebnm,
+    wavethresh (>= 4.6.8)
+Suggests:
+    smashr,
+    vebpm,
+    testthat (>= 3.0.0)
 License: MIT
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
+Config/testthat/edition: 3

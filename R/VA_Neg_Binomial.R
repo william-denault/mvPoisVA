@@ -22,7 +22,7 @@
 #'
 #'
 #'
-library(ebnm)
+
 nb_mean_lower_bound = function(x,
                                r = 1e3,
                                ebnm_params = NULL,

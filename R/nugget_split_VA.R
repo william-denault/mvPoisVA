@@ -17,6 +17,7 @@
 #'\deqn{x_i\sim Poisson(\exp(\mu_i)),}
 #'\deqn{\mu_i\sim N(b_i,\sigma^2),}
 #'\deqn{\b_i\sim g(.).}
+#'@export
 
 pois_smooth_split = function(x,
                              s = NULL,
@@ -123,7 +124,6 @@ pois_smooth_split_obj = function(x,s,m,s2,Eb,Eb2,sigma2,KLb){
 #'  \item{loglik:}{log likelihood}
 #'  \item{dKL:}{KL divergence between g(the prior) and q(the posterior)}
 #'@import wavethresh
-#'@import vebpm
 #'@import ebnm
 #'@export
 smash_dwt = function(x,sigma,filter.number=1,

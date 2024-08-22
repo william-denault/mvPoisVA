@@ -1,170 +1,105 @@
-#' @title Sum of Single Function
+#' @title Sum of Single Function (SuSiF)
 #'
-#' @description Implementation of the SuSiF method
+#' @description This function implements the SuSiF method for analyzing functional phenotypes using wavelet-based techniques.
 #'
-#' @details Implementation of the SuSiF method
+#' @details The SuSiF method is designed to work with functional phenotypes, where the underlying algorithm employs wavelets. This function accommodates various parameters for fine-tuning the analysis, such as specifying priors, convergence tolerance, and effect-fitting bounds.
 #'
+#' @param Y A matrix of size N by J representing the functional phenotype. The algorithm assumes that J is a power of 2. If J is not a power of 2, SuSiF internally remaps the data to a grid of length 2^J.
+#' @param Z A matrix of covariates. Details were not provided in the original documentation, please add relevant details.
+#' @param X A matrix of size N by P containing the covariates.
+#' @param L An upper bound on the number of effects to fit. Defaults to 2 if not specified.
+#' @param nugget Logical, if `TRUE`, the nugget effect is included in the model. Defaults to `TRUE`.
+#' @param L_start The number of effects initialized at the start of the algorithm. Defaults to 3.
+#' @param reflect Logical, if `TRUE`, reflection of the data is performed. Defaults to `FALSE`.
+#' @param verbose Logical, if `TRUE`, the function prints progress information. Defaults to `TRUE`.
+#' @param n_gh Number of Gauss-Hermite quadrature points. Defaults to 10.
+#' @param init_b_pm Initial values for the posterior mean of the coefficients. This parameter needs to be documented.
+#' @param tol A small, non-negative number specifying the convergence tolerance for the fitting procedure. Defaults to 1e-3.
+#' @param tol_vga_pois Convergence tolerance for the variational Gaussian approximation (VGA) for Poisson distribution. Defaults to 1e-5.
+#' @param maxit Maximum number of iterations for the fitting procedure. Defaults to 10.
+#' @param control_mixsqp A list of control parameters for the `mixsqp` function. Defaults are provided.
+#' @param thresh_lowcount A numeric threshold for handling wavelet coefficients with problematic distributions. Defaults to 0.
+#' @param gridmult A numeric value used to control the number of components in the mixture prior. Defaults to `sqrt(2)`.
+#' @param nullweight.mrash A numeric value for penalizing likelihood at point mass 0 in the `mrash` method. Defaults to 10.
+#' @param init_pi0_w.mrash Initial weight on the null component in the `mrash` method. Defaults to 10.
+#' @param cov_lev A numeric value between 0 and 1 for the expected level of coverage of credible sets. Defaults to 0.95.
+#' @param min_purity Minimum purity for estimated credible sets. Defaults to 0.5.
+#' @param greedy Logical, if `TRUE`, allows for a greedy search for extra effects. Defaults to `TRUE`.
+#' @param backfit Logical, if `TRUE`, allows discarding effects via backfitting. Defaults to `TRUE`.
+#' @param tol.mrash Convergence tolerance for the `mrash` method. Defaults to 1e-3.
+#' @param verbose.mrash Logical, if `TRUE`, prints progress information for the `mrash` method. Defaults to `TRUE`.
+#' @param maxit.mrash Maximum number of iterations for the `mrash` method. Defaults to 10.
+#' @param cal_obj.mrash Logical, if `TRUE`, computes ELBO for `mrash`. Defaults to `FALSE`.
+#' @param maxit.fsusie Maximum number of iterations for the `fsusie` method. Defaults to 50.
+#' @param cal_obj.fsusie Logical, if `TRUE`, computes ELBO for `fsusie`. Defaults to `FALSE`.
+#' @param max_SNP_EM Maximum number of SNPs considered in the EM algorithm. Defaults to 100.
+#' @param max_step_EM Maximum number of steps in the EM algorithm. Defaults to 1.
+#' @param cor_small Logical, if `TRUE`, corrects for small values in the correlation matrix. Defaults to `TRUE`.
+#' @param post_processing Specifies the post-processing method. Defaults to "HMM".
 #'
-#' @param Y functional phenotype, matrix of size N by size J. The
-#'   underlying algorithm uses wavelet, which assumes that J is of the
-#'   form J^2. If J is not a power of 2, susiF internally remaps the data
-#'   into a grid of length 2^J
-#'
-#' @param X matrix of size n by p contains the covariates
-#'
-#' @param L upper bound on the number of effects to fit (if not specified, set to =2)
-#'
-#' @param pos vector of length J, corresponding to position/time pf
-#' the observed column in Y, if missing, suppose that the observation
-#' are evenly spaced
-#'
-#' @param prior specify the prior used in susiF. The two available choices are
-#' available "mixture_normal_per_scale", "mixture_normal". Default "mixture_normal_per_scale",
-#' if this susiF is too slow, consider using  "mixture_normal" (up to 40% faster), but this may result in
-#' oversmoothing the estimated curves.
-#'
-#' @param verbose If \code{verbose = TRUE}, the algorithm's progress,
-#' and a summary of the optimization settings are printed to the
-#' console.
-#'
-#'
-#' @param tol a small, non-negative number specifying the convergence
-#' tolerance for the IBSS fitting procedure. The fitting procedure
-#' will halt when the difference in the variational lower bound, or
-#' \dQuote{ELBO} (the objective function to be maximized), is less
-#' than \code{tol}.
-#'
-#' @param maxit Maximum number of IBSS iterations.
-#'
-#' @param cov_lev numeric between 0 and 1, corresponding to the
-#' expected level of coverage of the cs if not specified set to 0.95
-#'
-#' @param min_purity minimum purity for estimated credible sets
-#' @param filter.cs logical, if TRUE filter the credible set (removing low purity
-#' cs and cs with estimated prior equal to 0). Set as TRUE by default.
-#' @param init_pi0_w starting value of weight on null compoenent in mixsqp
-#'  (between 0 and 1)
-#' @param control_mixsqp list of parameter for mixsqp function see  mixsqp package
-#' @param  cal_obj logical if set as TRUE compute ELBO for convergence monitoring
-#' @param quantile_trans logical if set as TRUE perform normal quantile transform
-#' on wavelet coefficients
-#' @param L_start number of effect initialized at the start of the algorithm
-#' @param nullweight numeric value for penalizing likelihood at point mass 0 (should be between 0 and 1)
-#' (usefull in small sample size)
-#' @param thresh_lowcount numeric, used to check the wavelet coefficients have
-#'  problematic distribution (very low dispersion even after standardization).
-#'  Basically check if the median of the absolute value of the distribution of
-#'   a wavelet coefficient is below this threshold. If yes, the algorithm discard
-#'   this wavelet coefficient (setting its estimate effect to 0 and estimate sd to 1).
-#'   Set to 0 by default. It can be useful when analyzing sparse data from sequence
-#'    based assay or small samples.
-#' @param greedy logical, if TRUE allows greedy search for extra effect
-#'  (up to L specified by the user). Set as TRUE by default
-#' @param backfit logical, if TRUE allow discarding effect via backfitting.
-#'  Set as true by default as TRUE. We advise keeping it as TRUE
-#' @param gridmult numeric used to control the number of components used in the mixture prior (see ashr package
-#'  for more details). From the ash function:  multiplier by which the default grid values for mixsd differ from one another.
-#'   (Smaller values produce finer grids.). Increasing this value may reduce computational time
-#'@param max_scale numeric, define the maximum of wavelet coefficients used in the analysis (2^max_scale).
-#'        Set 10 true by default.
-#'@param parallel allow parallel computation  (not supported on Windows)
+#' @return The function returns a list containing the SuSiF results and related components.
 #'
 #' @examples
+#' library(ashr)
+#' library(wavethresh)
+#' set.seed(1)
+#' # Example using curves simulated under the Mixture Normal Per Scale prior
+#' rsnr <- 0.2 # Expected root signal-to-noise ratio
+#' N <- 100    # Number of individuals
+#' P <- 10     # Number of covariates/SNPs
+#' pos1 <- 1   # Position of the causal covariate for effect 1
+#' pos2 <- 5   # Position of the causal covariate for effect 2
+#' lev_res <- 7 # Length of the molecular phenotype (2^lev_res)
+#' f1 <- simu_IBSS_per_level(lev_res)$sim_func # First effect
+#' f2 <- simu_IBSS_per_level(lev_res)$sim_func # Second effect
 #'
-#'library(ashr)
-#'library(wavethresh)
-#'set.seed(1)
-#'#Example using curves simulated under the Mixture normal per scale prior
-#'rsnr <- 0.2 #expected root signal noise ratio
-#'N <- 100    #Number of individuals
-#'P <- 10     #Number of covariates/SNP
-#'pos1 <- 1   #Position of the causal covariate for effect 1
-#'pos2 <- 5   #Position of the causal covariate for effect 2
-#'lev_res <- 7#length of the molecular phenotype (2^lev_res)
-#'f1 <-  simu_IBSS_per_level(lev_res )$sim_func#first effect
-#'f2 <- simu_IBSS_per_level(lev_res )$sim_func #second effect
+#' plot(f1, type ="l", ylab="effect", col="blue")
+#' abline(a=0, b=0)
+#' lines(f2, type="l", col="green")
 #'
-#'plot( f1, type ="l", ylab="effect", col="blue")
-#'abline(a=0,b=0)
-#'lines(f2, type="l", col="green")
+#' legend(x=100, y=3, lty=rep(1,3), legend=c("effect 1", "effect 2"), col=c("black","blue","yellow"))
+#' G <- matrix(sample(c(0, 1, 2), size=N*P, replace=TRUE), nrow=N, ncol=P) # Genotype matrix
+#' beta0 <- 0
+#' beta1 <- 1
+#' beta2 <- 1
+#' noisy.data <- list()
 #'
-#'legend(x=100,
-#'       y=3,
-#'       lty = rep(1,3),
-#'       legend= c("effect 1", "effect 2" ),
-#'       col=c("black","blue","yellow"))
-#'G = matrix(sample(c(0, 1,2), size=N*P, replace=TRUE), nrow=N, ncol=P) #Genotype
-#'beta0       <- 0
-#'beta1       <- 1
-#'beta2       <- 1
-#'noisy.data  <- list()
+#' for (i in 1:N) {
+#'   f1_obs <- f1
+#'   f2_obs <- f2
+#'   noise <- rnorm(length(f1), sd=(1/rsnr) * var(f1))
+#'   noisy.data[[i]] <- beta1 * G[i, pos1] * f1_obs + beta2 * G[i, pos2] * f2_obs + noise
+#' }
+#' noisy.data <- do.call(rbind, noisy.data)
 #'
-#'for ( i in 1:N)
-#'{
-#'  f1_obs <- f1
-#'  f2_obs <- f2
-#'  noise <- rnorm(length(f1), sd=  (1/  rsnr ) * var(f1))
-#'  noisy.data [[i]] <-   beta1*G[i,pos1]*f1_obs + beta2*G[i,pos2]*f2_obs + noise
+#' plot(noisy.data[1,], type="l", col=(G[1, pos1]*3+1), main="Observed curves\ncolored by the causal effect", ylim=c(-40,40), xlab="")
+#' for (i in 2:N) {
+#'   lines(noisy.data[i,], type="l", col=(G[i, pos1]*3+1))
+#' }
+#' legend(x=0.3, y=-10, lty=rep(1,3), legend=c("0", "1", "2"), col=c("black", "blue", "yellow"))
 #'
-#'}
-#'noisy.data <- do.call(rbind, noisy.data)
+#' Y <- noisy.data
+#' X <- G
+#' # Running SuSiF
+#' out <- susiF(Y, X, L=2, prior='mixture_normal_per_scale')
+#' # Visualizing the result
+#' plot_susiF(out)
 #'
-#'
-#'
-#'
-#'plot( noisy.data[1,], type = "l", col=(G[1, pos1]*3+1),
-#'      main="Observed curves \n colored by the causal effect", ylim= c(-40,40), xlab="")
-#'for ( i in 2:N)
-#'{
-#'  lines( noisy.data[i,], type = "l", col=(G[i, pos1]*3+1))
-#'
-#'}
-#'legend(x=0.3,
-#'       y=-10,
-#'       lty = rep(1,3),
-#'       legend= c("0", "1","2"),
-#'       col=c("black","blue","yellow"))
-#'
-#'
-#'
-#'Y <- noisy.data
-#'X <- G
-#'#Running fSuSiE
-#'
-#'out <- susiF(Y,X,L=2 , prior = 'mixture_normal_per_scale')
-#'#the easiest way to visualize the result is to use the plot_susiF function
-#'
-#'plot_susiF(out)
-#'
-#'#You can also access the information directly in the output of susiF  as follow
-#'par(mfrow=c(1,2))
-#'
-#'plot( f1, type="l", main="Estimated effect 1", xlab="")
-#'lines(unlist(out$fitted_func[[1]]),col='blue' )
-#'abline(a=0,b=0)
-#'legend(x= 35,
-#'       y=3,
-#'       lty= rep(1,2),
-#'       legend = c("effect 1"," fSuSiE est "),
-#'       col=c("black","blue" )
-#')
-#'plot( f2, type="l", main="Estimated effect 2", xlab="")
-#'lines(unlist(out$fitted_func[[2]]),col='green' )
-#'abline(a=0,b=0)
-#'legend(x= 20,
-#'       y=-1.5,
-#'       lty= rep(1,2),
-#'       legend = c("effect 2"," fSuSiE est "),
-#'       col=c("black","green" )
-#')
-#'
-#'par(mfrow=c(1,1))
-#'plot_susiF(out)
+#' # Accessing the output of SuSiF directly
+#' par(mfrow=c(1,2))
+#' plot(f1, type="l", main="Estimated effect 1", xlab="")
+#' lines(unlist(out$fitted_func[[1]]), col='blue')
+#' abline(a=0, b=0)
+#' legend(x=35, y=3, lty=rep(1,2), legend=c("effect 1","fSuSiE est"), col=c("black","blue"))
+#' plot(f2, type="l", main="Estimated effect 2", xlab="")
+#' lines(unlist(out$fitted_func[[2]]), col='green')
+#' abline(a=0, b=0)
+#' legend(x=20, y=-1.5, lty=rep(1,2), legend=c("effect 2","fSuSiE est"), col=c("black","green"))
+#' par(mfrow=c(1,1))
+#' plot_susiF(out)
 #'
 #' @importFrom stats var
-#'
 #' @export
-#'
 HF_susiF2 <- function(Y,
                      Z,
                      X,

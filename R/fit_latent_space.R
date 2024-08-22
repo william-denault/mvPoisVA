@@ -1,87 +1,85 @@
-
-#' @export
+#' @title Simulating and Fitting Latent Space Model for Count Data
+#'
+#' @description This script provides a framework for simulating count data from genotype matrices and fitting a latent space model using Poisson distribution-based methods. The functions `fit_latent_space` and `fit_latent_nugget` are designed to estimate the underlying latent structure in count data.
+#'
+#' @details The script includes steps for simulating count data based on genotype information and known functional effects. The main function, `fit_latent_space`, fits a latent space model to this data, using a variational approach to solve the Poisson distribution. The function `fit_latent_nugget` offers an alternative method that includes a nugget effect estimation for variance adjustment.
 #'
 #' @examples
-#'library(mvPoisVA)
-#'library(fsusieR)
-#'library(susieR)
-#'data(N3finemapping)
-#'X <- N3finemapping$X
-#'mysd=0.1
-#'N =30
-
-#'lev_res =8
-
-#'genotype <-X[1:N,1:500]
-
-#'idx <- which( apply( genotype,2, var ) <1e-15)
-#'genotype <- genotype [, -idx]
-#'count.data  <- list()
-#'L <-2# sample(1:2, size =1)#actual number of effect
-
-#'lf <-  list()
-#'for(l in 1:L){
-#'  lf[[l]] <-log(abs(0.2*sim_intenisty(lev_res )$sim_intens) )#functional effect for effect l
-#'}
-
-
-#'data(N3finemapping)
-#'X <- N3finemapping$X
-#'genotype <-X[sample(1:nrow(X), size=N),]
-
-#'idx <- which( apply( genotype,2, var ) <1e-15)
-#'if( length(idx)==0){
-#'  X <-genotype
+#' library(mvPoisVA)
+#' library(fsusieR)
+#' library(susieR)
+#' data(N3finemapping)
 #'
-#'  Rtrue <- cor (genotype )
-#'}else{
-#'  genotype <- genotype [, -idx]
-#'  X <-genotype
+#' X <- N3finemapping$X
+#' mysd <- 0.1
+#' N <- 30
+#' lev_res <- 8
+#' genotype <- X[1:N, 1:500]
+#' idx <- which(apply(genotype, 2, var) < 1e-15)
+#' genotype <- genotype[, -idx]
+#' count.data <- list()
+#' L <- 2 # Actual number of effects
+#' lf <- list()
 #'
-#'}
-#'G<- genotype
-#'X <- (X -0.99*min(X))/(0.5*max(X ))
+#' for (l in 1:L) {
+#'   lf[[l]] <- log(abs(0.2 * sim_intenisty(lev_res)$sim_intens)) # Functional effect for effect l
+#' }
 #'
-#'G <-  (G -0.99*min(G ))/(0.5*max(G ))
+#' data(N3finemapping)
+#' X <- N3finemapping$X
+#' genotype <- X[sample(1:nrow(X), size = N), ]
+#' idx <- which(apply(genotype, 2, var) < 1e-15)
+#' if (length(idx) == 0) {
+#'   X <- genotype
+#'   Rtrue <- cor(genotype)
+#' } else {
+#'   genotype <- genotype[, -idx]
+#'   X <- genotype
+#' }
 #'
-#'tpos <- sample(1:ncol(genotype), replace = FALSE,size=2)
-#'true_pos <- tpos
-#'pos1 <- tpos[1]
-#'pos2 <- tpos[2]
-#'if( length(which(apply(G,2,var)==0))>0){
-#'  G <- G[,-which(apply(G,2,var)==0)]
-#'}
-#'# G <- matrix( rnorm(nrow(genotype)*300), nrow = nrow(genotype))
+#' G <- genotype
+#' X <- (X - 0.99 * min(X)) / (0.5 * max(X))
+#' G <- (G - 0.99 * min(G)) / (0.5 * max(G))
+#' tpos <- sample(1:ncol(genotype), replace = FALSE, size = 2)
+#' true_pos <- tpos
+#' pos1 <- tpos[1]
+#' pos2 <- tpos[2]
 #'
+#' if (length(which(apply(G, 2, var) == 0)) > 0) {
+#'   G <- G[, -which(apply(G, 2, var) == 0)]
+#' }
 #'
-#'predictor <-rep (0, length(lf[[1]] ))
-#'count.data  <- list()
-#'for ( i in 1:N)
-#'{
+#' predictor <- rep(0, length(lf[[1]]))
+#' count.data <- list()
+#' for (i in 1:N) {
+#'   predictor <- rep(0, length(lf[[1]]))
+#'   for (l in 1:L) {
+#'     predictor <- predictor + G[i, true_pos[l]] * lf[[l]]
+#'   }
+#'   predictor <- exp(predictor + rnorm(length(lf[[1]]), sd = mysd))
+#'   count.data[[i]] <- rpois(n = length(lf[[1]]), lambda = predictor)
+#' }
 #'
-#'  predictor <-rep (0, length(lf[[1]] ))
+#' count.data <- do.call(rbind, count.data)
+#' Y <- count.data
+#' Y[1, ] <- NA
+#' Y[10, ] <- NA
+#' out <- fit_latent_space(Y)
+#' image(out$Y)
+#' plot(out$Y, Y)
 #'
-#'  for ( l in 1:L){
-#'    predictor <-predictor + G[i, true_pos[l]]*lf[[l]]
-#'  }
-#'  predictor <- exp(predictor+ rnorm(  length(lf[[1]]), sd=mysd))
+#' @param Y A matrix of count data where rows represent observations and columns represent features.
+#' @param tol A numeric value specifying the convergence tolerance for the fitting procedure. Defaults to 1e-4.
+#' @param verbose A logical indicating whether to print progress messages. Defaults to TRUE.
+#' @param reflect A logical indicating whether to apply reflection to the data if the number of columns is not a power of 2. Defaults to FALSE.
 #'
-#'  count.data [[i]] <-   rpois(n= length(lf[[1]]) ,
-#'                              lambda =predictor  )
+#' @return A list with the following components:
+#' \item{Y}{The fitted latent space model matrix.}
+#' \item{reflect}{Logical indicating whether the reflection was applied.}
 #'
-#'}
-#'count.data <- do.call(rbind, count.data)
+#' @importFrom stats var
+#' @export
 #'
-#'
-#'Y <- count.data
-#'
-#'Y[1,] <- NA
-#'Y[10, ] <- NA
-#'out <- fit_latent_space(Y)
-#'
-#'image (out$Y)
-#'plot(out$Y, Y)
-
 
 fit_latent_space <- function(Y,tol=1e-4,verbose=TRUE,reflect =FALSE){
   ##initiatilzation -----

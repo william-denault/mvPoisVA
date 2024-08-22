@@ -57,7 +57,6 @@
 #'\item{\code{warmstart}}{init posterior using last iteration's results}
 #'\item{\code{W}}{DWT matrix for non-haar wavelet basis}
 #'}
-#'@import vebpm
 #'@import wavethresh
 #'@import smashr
 #'@export

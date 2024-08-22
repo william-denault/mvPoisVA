@@ -9,10 +9,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 5,
+  fig.height = 3,
+  fig.align = "center",
+  fig.cap = "&nbsp;",
+  dpi = 175
+  )
+```
 ## Generate data
 
 
