@@ -89,13 +89,34 @@ image(Y)
 hist(Y)
 
 
-Y_t  <-fit_latent_space(Y )
+tt <- pois_mean_split(c(Y),
+                      mu_pm_init= c(log(Y+1)))
 
+Y_t <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
 
 
 Y_t1  <-fit_latent_nugget(Y )
 
-plot(Y_t $Y, log(Y+1) )
-points(log(Y_t1 $Y), log(Y+1), col="green")
+tl =list()
+
+for ( i in 1:nrow(Y)){
+
+  tl[[i]] =pois_mean_split(Y[i,],
+                           mu_pm_init= c(log(Y[i,]+1)))$posterior$mean_log
+}
+Y2 = do.call(rbind, tl)
+
+
+Y3 = matrix( pois_mean_split(c(Y),
+                             mu_pm_init= c(log(Y+1)))$posterior$mean_log, byrow = FALSE, nrow = nrow(Y) )
+
+
+plot( (Y2 +1), (Y3 +1) )
+plot( (Y2 +1), log(Y+1) )
+points( (Y3 +1), log(Y+1), col="magenta")
+
+points( (Y_t1 $Y), log(Y+1), col="green")
+points(Y_t  , log(Y+1), col="red")
+
 abline(a=0,b=1)
 

@@ -8,11 +8,11 @@ library(ebnm)
 lf1_fit <-  list()
 lf2_fit <-  list()
 
-for (o in 1:40){
-
+for (o in 1:400){
+print(o)
   data(N3finemapping)
   X <- N3finemapping$X
-  mysd=0.1
+  mysd=0.5
   N =200
   genotype <-X[1:N,1:100]
 

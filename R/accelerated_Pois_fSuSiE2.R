@@ -9,7 +9,11 @@ acc_Pois_fSuSiE2 <- function(Y,
                             Z,
                             X,
                             L=3,
-                            nugget=FALSE,
+                            ebps_method=c('pois_mean_split',
+                                          'ind_pois_mean_split',
+                                          'ind_ebps',
+                                          'ind_poisson_smoothing',
+                                           'nugget'),
                             L_start=3,
                             reflect =FALSE,
                             verbose=TRUE,
@@ -50,9 +54,16 @@ acc_Pois_fSuSiE2 <- function(Y,
   }
 
 
+  #static arguements
+  ebps_method  <- match.arg(ebps_method)
   fit_approach <- "both"
+
+
+  if (missing(X) & missing(Z)){
+    stop("Please provide a Z or a X matrix")
+  }
   if(missing(X)){
-    print("No correlated covariate provided, the algorithm will perform penalized regression only")
+    print("No covariate to fine-map provided, the algorithm will perform penalized regression only")
     fit_approach <- "penalized"
   }
   if(missing(Z)){
@@ -71,8 +82,7 @@ acc_Pois_fSuSiE2 <- function(Y,
   }else{
     idx_out <- 1: ncol(Y)
   }
-  #### to avoid 0 in Y_min to correct at the end
-  Y <- Y
+
 
   if(fit_approach %in% c('both',"fine_mapping")){
     tidx <- which(apply(X,2,var)==0)
@@ -111,15 +121,35 @@ acc_Pois_fSuSiE2 <- function(Y,
   sigma2_pois=0.1
   Mu_pm_init <- log(Mu_pm+1)
   ##### Poisson Part ----
-  if (!nugget){
+
+  if (ebps_method =="pois_mean_split" ){
     tt <- pois_mean_split(c(Y),
                                   mu_pm_init= c(Mu_pm_init))
 
     Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
-  }else{
+  }
+  if(ebps_method =="ind_pois_mean_split" ){
+    Mu_pm <- matrix(apply(Y,1, function(y) pois_mean_split(y,
+                                                           mu_pm_init= c(log(y+1)) )$posterior$mean_log),
+                    byrow = TRUE,
+                    ncol=ncol(Y))
+  }
 
+  if(ebps_method =="ind_ebps" ){
+    Mu_pm <- matrix(apply(Y,1, function(y) ebps(y)$posterior$mean_log),
+                    byrow = TRUE,
+                    ncol=ncol(Y))
+  }
+ if(ebps_method =="ind_poisson_smoothing" ){
+    Mu_pm <- matrix(apply(Y,1, function(y) pois_smooth_split(y,
+                                                             Eb_init= c(log(y+1)) )$posterior$mean_log),
+                    byrow = TRUE,
+                    ncol=ncol(Y))
+  }
+  if (ebps_method =="nugget" ){
     Mu_pm <- (fit_latent_nugget(Y)$Y)
   }
+
 
 
   #### SuSiE part ----
@@ -278,7 +308,7 @@ acc_Pois_fSuSiE2 <- function(Y,
 
 
 
-  print(    susiF.obj$cs)
+#print(    susiF.obj$cs)
   iter=iter+1
 
 

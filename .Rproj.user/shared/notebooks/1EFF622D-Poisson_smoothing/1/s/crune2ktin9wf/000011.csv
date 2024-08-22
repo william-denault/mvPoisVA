@@ -1,3 +1,0 @@
-"0","fit = pois_smooth_split(x,maxiter=30)"
-"0","fit_ebps = ebps(x)"
-"0","plot(x,col='grey80')"

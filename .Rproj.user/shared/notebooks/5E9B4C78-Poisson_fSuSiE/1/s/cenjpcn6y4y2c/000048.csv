@@ -1,5 +1,0 @@
-"0","lines(lf[[2]] )
-"
-"2","Error in plot.xy(xy.coords(x, y), type = type, ...) : 
-  plot.new has not been called yet
-"
