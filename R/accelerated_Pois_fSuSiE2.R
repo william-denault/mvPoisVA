@@ -90,7 +90,6 @@ acc_Pois_fSuSiE2 <- function(Y,
       warning(paste("Some of the columns of X are constants, we removed" ,length(tidx), "columns"))
       X <- X[,-tidx]
     }
-    X <- fsusieR:::colScale(X)
   }
   if(fit_approach %in% c('both',"penalized")){
     tidx <- which(apply(Z,2,var)==0)
@@ -98,7 +97,6 @@ acc_Pois_fSuSiE2 <- function(Y,
       warning(paste("Some of the columns of Z are constants, we removed" ,length(tidx), "columns"))
       Z <- Z[,-tidx]
     }
-    Z <- fsusieR:::colScale(Z)
   }
 
   indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
@@ -155,8 +153,8 @@ acc_Pois_fSuSiE2 <- function(Y,
   #### SuSiE part ----
 
 
-    tmp_Mu_pm_pen <- 0*tmp_Mu_pm
-    tmp_Mu_pm_fm  <- 0*tmp_Mu_pm
+    tmp_Mu_pm_pen <- 0* Mu_pm
+    tmp_Mu_pm_fm  <- 0* Mu_pm
     init=FALSE
 
     #### fit EBmvFR ----
@@ -218,7 +216,7 @@ acc_Pois_fSuSiE2 <- function(Y,
                                        t(susiF.obj$fitted_func[[l]]%*% t(susiF.obj$alpha[[l]]))
       )
       )
-      mat_mean <-   matrix( t_mean_susiF , byrow = TRUE,
+      mat_mean <-   matrix( fm_pm , byrow = TRUE,
                             nrow=nrow(X), ncol=ncol(Y))
     }else{
       fm_pm <-0* tmp_Mu_pm_fm

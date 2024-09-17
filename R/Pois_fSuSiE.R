@@ -87,14 +87,10 @@ Pois_fSuSiE <- function(Y,
       warning(paste("Some of the columns of Z are constants, we removed" ,length(tidx), "columns"))
       Z <- Z[,-tidx]
     }
-    Z <- fsusieR:::colScale(Z)
   }
 
   indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
 
-
-
-  X <- fsusieR:::colScale(X)
 
 
 

@@ -31,7 +31,8 @@ pois_mean_split = function(x,s=NULL,
                            sigma2 = NULL,
                            est_sigma2 = TRUE,
                            tol=1e-5,
-                           maxiter=1e3,
+                           maxiter=20,
+                           cal_obj = FALSE,
                            ebnm_params=NULL,
                            mu_pm_init = NULL){
   n = length(x)
@@ -112,16 +113,19 @@ pois_mean_split = function(x,s=NULL,
     }
 
     #print(paste('after sigma2, obj=',splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)))
+  if (cal_obj){
 
-    # ELBO
-    obj[iter+1] = splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)
+   # ELBO
+     obj[iter+1] = splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)
     if((obj[iter+1]-obj[iter])/n<tol){
       obj = obj[1:(iter+1)]
-      if((obj[iter+1]-obj[iter])<0){
-        warning('An iteration decreases ELBO. This is likely due to numerical issues.')
-      }
-      break
-    }
+       if((obj[iter+1]-obj[iter])<0){
+         warning('An iteration decreases ELBO. This is likely due to numerical issues.')
+       }
+       break
+     }
+   }
+
 
   }
   t_end = Sys.time()
