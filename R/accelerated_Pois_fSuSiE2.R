@@ -154,157 +154,77 @@ acc_Pois_fSuSiE2 <- function(Y,
 
   #### SuSiE part ----
 
-  init=TRUE
 
-  if(init){
-
-    tmp_Mu_pm <- fsusieR::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
-    lowc_wc <-  which_lowcount(tmp_Mu_pm,
-                               thresh_lowcount=thresh_lowcount)
-
-    if( length(lowc_wc) > (ncol(tmp_Mu_pm)-10)){
-      out <-NULL
-
-      return(out)
-    }
-
-    W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm )],
-               C = tmp_Mu_pm [,  ncol(tmp_Mu_pm )])
-    if (fit_approach %in% c("both", "penalized")){
-      temp <- fsusieR:: init_prior(Y              = tmp_Mu_pm,
-                                       X              = Z ,
-                                       prior          = prior_mv ,
-                                       v1             = v1,
-                                       indx_lst       = indx_lst,
-                                       lowc_wc        = lowc_wc,
-                                       control_mixsqp = control_mixsqp,
-                                       nullweight     = nullweight.mrash,
-                                       gridmult       = gridmult )
-      G_prior     <- temp$G_prior
-
-
-      #Recycled for the first step of the while loop
-      EBmvFR.obj   <-  fsusieR::init_EBmvFR_obj(G_prior = G_prior,
-                                                    Y       = Y,
-                                                    X       = Z
-      )
-      print('Done initializing EBmvFR.obj')
-    }
-    if(fit_approach %in%c("both","fine_mapping")){
-
-      temp <- fsusieR:: init_prior(Y              = tmp_Mu_pm,
-                                       X              = X ,
-                                       prior          = prior_mv ,
-                                       v1             = v1,
-                                       indx_lst       = indx_lst,
-                                       lowc_wc        = lowc_wc,
-                                       control_mixsqp = control_mixsqp,
-                                       nullweight     = nullweight.mrash,
-                                       gridmult       = gridmult )
-      G_prior     <- temp$G_prior
-
-
-      #Recycled for the first step of the while loop
-      susiF.obj   <-  fsusieR::init_susiF_obj(L_max   = L,
-                                                  G_prior = G_prior,
-                                                  Y       = tmp_Mu_pm,
-                                                  X       = X,
-                                                  L_start = L_start,
-                                                  greedy  = greedy,
-                                                  backfit = backfit
-      )
-      print('Done initializing susiF.obj')
-
-    }
     tmp_Mu_pm_pen <- 0*tmp_Mu_pm
     tmp_Mu_pm_fm  <- 0*tmp_Mu_pm
     init=FALSE
-  }
 
-  #### fit EBmvFR ----
-  if(fit_approach%in% c("both", "penalized")){
-    tmp_Mu_pm_pen <- Mu_pm  -  fm_pm#potentially run smash on colmean
-
-    t_mean_EBmvFR <-  apply(tmp_Mu_pm_pen,2, mean )
-    tmp_Mu_pm_pen <- fsusieR::colScale(tmp_Mu_pm_pen, scale=FALSE)
-    W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_pen )],
-               C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_pen )])
+    #### fit EBmvFR ----
+    if(fit_approach%in% c("both", "penalized")){
+      tmp_Mu_pm_pen <- Mu_pm  -  fm_pm#potentially run smash on colmean
 
 
-    ### TODO: Maybe use better restarting point for EBmvFR.obj
-    EBmvFR.obj   <- fsusieR::EBmvFR.workhorse(EBmvFR.obj     = EBmvFR.obj,
-                                                  W              = W,
-                                                  X              = Z,
-                                                  tol            = tol.mrash,
-                                                  lowc_wc        = lowc_wc  ,
-                                                  init_pi0_w     = init_pi0_w.mrash ,
-                                                  control_mixsqp = control_mixsqp ,
-                                                  indx_lst       = indx_lst,
-                                                  nullweight     = nullweight.mrash,
-                                                  cal_obj        = cal_obj.mrash,
-                                                  verbose        = FALSE,
-                                                  maxit          = maxit.mrash,
-                                                  max_step_EM =1
-    )
-    if(verbose){
-      print( paste('Posterior of EB regression coefficient computed for iter ',iter))
+      ### TODO: Maybe use better restarting point for EBmvFR.obj
+      EBmvFR.obj   <-  EBmvFR ( Y=tmp_Mu_pm_pen,
+                                X              = Z,
+                                tol            = tol.mrash,
+                                lowc_wc        = lowc_wc  ,
+                                init_pi0_w     = init_pi0_w.mrash ,
+                                control_mixsqp = control_mixsqp ,
+                                indx_lst       = indx_lst,
+                                nullweight     = nullweight.mrash,
+                                cal_obj        = cal_obj.mrash,
+                                verbose        = FALSE,
+                                maxit          = maxit.mrash,
+                                max_step_EM =1
+      )
+      if(verbose){
+        print( paste('Posterior of EB regression coefficient computed for iter ',iter))
+      }
+      b_pm <-   Z%*%  EBmvFR.obj$fitted_wc[[1]]
+
+      if( fit_approach== "penalized")
+        mat_mean <-   matrix( t_mean_EBmvFR , byrow = TRUE,
+                              nrow=nrow(X), ncol=ncol(Y))
+
+    }else{
+      b_pm <- 0* tmp_Mu_pm_pen
+
     }
-    b_pm <-   Z%*%  EBmvFR.obj$fitted_wc[[1]]
 
-    if( fit_approach== "penalized")
-      mat_mean <-   matrix( t_mean_EBmvFR , byrow = TRUE,
+    if(fit_approach%in% c("both", "fine_mapping")){
+      tmp_Mu_pm_fm <- Mu_pm -  b_pm#potentially run smash on colmean
+
+
+      susiF.obj     <- susiF (
+        Y              =  tmp_Mu_pm_fm ,
+        X               = X ,
+        L               = L,
+        tol             = tol,
+        control_mixsqp  = control_mixsqp ,
+        nullweight      = nullweight.mrash,
+        cal_obj         = cal_obj.fsusie,
+        verbose         = verbose,
+        cov_lev         = cov_lev,
+        min_purity      = min_purity,
+        maxit           = maxit.fsusie ,
+        cor_small       = cor_small,
+        post_processing = "HMM")
+
+
+
+      fm_pm <- X%*%Reduce("+",lapply(1:length(susiF.obj$cs),
+                                     function(l)
+                                       t(susiF.obj$fitted_func[[l]]%*% t(susiF.obj$alpha[[l]]))
+      )
+      )
+      mat_mean <-   matrix( t_mean_susiF , byrow = TRUE,
                             nrow=nrow(X), ncol=ncol(Y))
+    }else{
+      fm_pm <-0* tmp_Mu_pm_fm
+      susiF.obj   <- NULL
+    }
 
-  }else{
-    b_pm <- 0* tmp_Mu_pm_pen
-
-  }
-
-  if(fit_approach%in% c("both", "fine_mapping")){
-    tmp_Mu_pm_fm <- Mu_pm -  b_pm#potentially run smash on colmean
-
-    t_mean_susiF <-  apply(tmp_Mu_pm_fm,2, mean )
-
-    tmp_Mu_pm_fm <- fsusieR::colScale(tmp_Mu_pm_fm, scale=FALSE)
-    W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_fm )],
-               C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
-    print(sum(is.na (tmp_Mu_pm_fm )))
-
-    susiF.obj     <- fsusieR::susiF (
-      Y               = tmp_Mu_pm_fm ,
-      X               = X,
-      L               = L,
-      tol             = tol,
-      control_mixsqp  = control_mixsqp ,
-      nullweight      = nullweight.mrash,
-      cal_obj         = cal_obj.fsusie,
-      verbose         = verbose,
-      cov_lev         = cov_lev,
-      min_purity      = min_purity,
-      maxit           = maxit.fsusie ,
-      cor_small       = cor_small,
-      post_processing = post_processing,
-      thresh_lowcount = thresh_lowcount)
-
-
-
-
-
-    fm_pm <- X%*%Reduce("+",lapply(1:length(susiF.obj$cs),
-                                   function(l)
-                                     sweep(  sweep( susiF.obj$fitted_wc[[l]]  , 1,attr(X, "scaled:scale"),
-                                                    "*" ),
-                                             1,
-                                             susiF.obj$alpha[[l]],
-                                             "*")
-    )
-    )
-    mat_mean <-   matrix( t_mean_susiF , byrow = TRUE,
-                          nrow=nrow(X), ncol=ncol(Y))
-  }else{
-    fm_pm <-0* tmp_Mu_pm_fm
-    susiF.obj   <- NULL
-  }
 
 
 

@@ -247,37 +247,27 @@ print("here1")
     if(fit_approach%in% c("both", "fine_mapping")){
       tmp_Mu_pm_fm <- Mu_pm -  b_pm#potentially run smash on colmean
 
-      t_mean_susiF <-  apply(tmp_Mu_pm_fm,2, mean )
 
-      tmp_Mu_pm_fm <- fsusieR::colScale(tmp_Mu_pm_fm, scale=FALSE)
-      W <- list( D = tmp_Mu_pm [, -ncol(tmp_Mu_pm_fm )],
-                 C = tmp_Mu_pm [,  ncol(tmp_Mu_pm_fm )])
-print(sum(is.na (tmp_Mu_pm_fm )))
-
-     susiF.obj     <- susiF (
-                                Y              =  tmp_Mu_pm_fm ,
-                                X               = X,
-                                L               = L,
-                                tol             = tol,
-                                control_mixsqp  = control_mixsqp ,
-                                nullweight      = nullweight.mrash,
-                                cal_obj         = cal_obj.fsusie,
-                                verbose         = verbose,
-                                cov_lev         = cov_lev,
-                                min_purity      = min_purity,
-                                maxit           = maxit.fsusie ,
-                                cor_small       = cor_small,
-                                post_processing = "none")
+      susiF.obj     <- susiF (
+        Y              =  tmp_Mu_pm_fm ,
+        X               = X ,
+        L               = L,
+        tol             = tol,
+        control_mixsqp  = control_mixsqp ,
+        nullweight      = nullweight.mrash,
+        cal_obj         = cal_obj.fsusie,
+        verbose         = verbose,
+        cov_lev         = cov_lev,
+        min_purity      = min_purity,
+        maxit           = maxit.fsusie ,
+        cor_small       = cor_small,
+        post_processing = "HMM")
 
 
 
       fm_pm <- X%*%Reduce("+",lapply(1:length(susiF.obj$cs),
                                      function(l)
-                                       sweep(  sweep( susiF.obj$fitted_wc[[l]]  , 1,attr(X, "scaled:scale"),
-                                                      "*" ),
-                                               1,
-                                               susiF.obj$alpha[[l]],
-                                               "*")
+                                       t(susiF.obj$fitted_func[[l]]%*% t(susiF.obj$alpha[[l]]))
       )
       )
       mat_mean <-   matrix( t_mean_susiF , byrow = TRUE,
