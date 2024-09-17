@@ -27,3 +27,16 @@ for ( l in 1:length(fit$susiF.obj$fitted_func)){
   lines(  exp(fit$susiF.obj$fitted_func[[l]])-1  ,col=l+1)
 }
 
+
+
+i=1
+plot(Y[i,])
+lines( exp(fit$susiF.obj$ind_fitted_func[i,] ) ,col=2)
+ i=i+1
+
+
+ cor(c(Y),  c(exp(fit$susiF.obj$ind_fitted_func)))
+ #0.6052298
+ cor(c(Y), c(out$res$ind_fitted_func))
+
+file

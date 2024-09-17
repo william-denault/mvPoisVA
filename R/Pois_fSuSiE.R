@@ -266,7 +266,7 @@ print("here1")
                                        t(susiF.obj$fitted_func[[l]]%*% t(susiF.obj$alpha[[l]]))
       )
       )
-      mat_mean <-   matrix( t_mean_susiF , byrow = TRUE,
+      mat_mean <-   matrix(Mu_pm -fm_pm , byrow = TRUE,
                             nrow=nrow(X), ncol=ncol(Y))
     }else{
       fm_pm <-0* tmp_Mu_pm_fm
