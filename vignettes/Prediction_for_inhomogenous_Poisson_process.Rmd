@@ -1,0 +1,186 @@
+---
+title: "Prediction_for_inhomogenous_Poisson_process"
+author: "William Denault"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to Poisson-fSuSiE}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r , include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 5,
+  fig.height = 3,
+  fig.align = "center",
+  fig.cap = "&nbsp;",
+  dpi = 175
+  )
+```
+
+
+```{r setup, include=FALSE}
+rm(list = ls())
+library(mvPoisVA)
+library(fsusieR)
+library(susieR)
+library(ebnm)
+set.seed(1)
+'%!in%' <- function(x,y)!('%in%'(x,y))
+N =700
+data(N3finemapping)
+Z <- matrix (runif(N*200, min=0,max=1.5), nrow =N, ncol = 200)
+mysd=0.2
+
+ 
+```
+
+
+
+
+
+
+Here we assume that we observe some covariates that affect the rate of the Poisson process.  We want to build a prediction model that 
+
+```{r}
+
+ 
+lev_res =7
+count.data  <- list()
+N_effect=30
+lf <-  list()
+for ( j in 1:N_effect){
+  lf[[j]]<- rep(0.001, 2^lev_res )
+  start= sample(1:(2^lev_res-11), size=1)
+lf[[j]][start:(start+10)] <-1
+ lf[[j]]=  (lf[[j]])
+}
+
+
+
+
+true_pos <- sample(1:ncol(genotype), replace = FALSE,size=2)
+
+plot (lf[[1]], type="l", main=paste ( "effect of SNP",true_pos[1]))
+
+plot (lf[[2]], type="l", main=paste ( "effect of SNP",true_pos[2]))
+```
+
+
+
+Simulating the data
+
+```{r}
+ 
+predictor <-rep (0, length(lf[[1]] ))
+count.data  <- list()
+intensity= list()
+for ( i in 1:N)
+{
+
+  predictor <-rep (0, length(lf[[1]] ))
+
+  for ( j in 1:N_effect){
+    predictor <-predictor + Z[i, j]*lf[[j]] 
+  }
+  intensity[[i]]=predictor 
+  predictor <- exp( predictor+ rnorm(  length(lf[[1]]), sd=mysd))
+
+  
+  count.data [[i]] <-   rpois(n= length(lf[[1]]) ,
+                              lambda =predictor  )
+
+}
+count.data <- do.call(rbind, count.data)
+
+
+Y <- count.data
+
+int= do.call(rbind, intensity)
+image(log(Y))
+hist(Y, nclass=100, main="Histogram of the count data")
+```
+ 
+```{r}
+
+res= acc_Pois_fSuSiE2(Y=Y ,Z=Z)
+```
+We can now check the performance of the model by comparing the estimated underlying intensity
+vs the true intensity. 
+
+```{r}
+
+plot(Z%*%res$EBmvFR.obj$fitted_func, int)
+lm_fit = lm(c(int)~  c( Z%*%res$EBmvFR.obj$fitted_func))
+
+summary(lm_fit)
+
+```
+We can also compare the predicted count data vs the true count data. 
+In green the exp of the predicted intensity vs the true count data.
+in black the exp of the true intensity vs the true count data.
+```{r}
+
+
+ 
+plot(exp(Z%*%res$EBmvFR.obj$fitted_func), Y, col="green")
+points( exp(int) , (Y))
+
+```
+
+Out of sample prediction:
+
+generate the data
+
+```{r}
+Z2 <- matrix (runif(N*200, min=0,max=1.5), nrow =N, ncol = 200)
+
+
+
+
+predictor <-rep (0, length(lf[[1]] ))
+count.data2  <- list()
+intensity2= list()
+for ( i in 1:N)
+{
+
+  predictor <-rep (0, length(lf[[1]] ))
+
+  for ( j in 1:N_effect){
+    predictor <-predictor + Z2[i, j]*lf[[j]] 
+  }
+  intensity2[[i]]=predictor 
+  predictor <- exp( predictor+ rnorm(  length(lf[[1]]), sd=mysd))
+
+  
+  count.data2 [[i]] <-   rpois(n= length(lf[[1]]) ,
+                              lambda =predictor  )
+
+}
+count.data2 <- do.call(rbind, count.data2)
+
+
+Y2 <- count.data2
+int2= do.call(rbind, intensity2)
+```
+
+
+```{r}
+
+plot(Z2%*%res$EBmvFR.obj$fitted_func, int2)
+lm_fit = lm(c(int2)~  c( Z2%*%res$EBmvFR.obj$fitted_func))
+
+summary(lm_fit)
+
+```
+
+
+```{r}
+ 
+plot(exp(Z2%*%res$EBmvFR.obj$fitted_func), Y2, col="green")
+points( exp(int2) , (Y2))
+```
+
+

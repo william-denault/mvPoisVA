@@ -53,7 +53,6 @@ acc_Pois_fSuSiE2 <- function(Y,
     stop("Please provide a Z or a X matrix")
   }
 
-
   #static arguements
   ebps_method  <- match.arg(ebps_method)
   fit_approach <- "both"
@@ -71,7 +70,6 @@ acc_Pois_fSuSiE2 <- function(Y,
     fit_approach <- "fine_mapping"
 
   }
-
   ##initiatilzation -----
   init=TRUE
   J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
@@ -82,7 +80,6 @@ acc_Pois_fSuSiE2 <- function(Y,
   }else{
     idx_out <- 1: ncol(Y)
   }
-
 
   if(fit_approach %in% c('both',"fine_mapping")){
     tidx <- which(apply(X,2,var)==0)
@@ -103,7 +100,6 @@ acc_Pois_fSuSiE2 <- function(Y,
 
 
 
-  X <- fsusieR:::colScale(X)
 
 
 
@@ -155,6 +151,7 @@ acc_Pois_fSuSiE2 <- function(Y,
 
     tmp_Mu_pm_pen <- 0* Mu_pm
     tmp_Mu_pm_fm  <- 0* Mu_pm
+    fm_pm          <- 0* Mu_pm
     init=FALSE
 
     #### fit EBmvFR ----
@@ -166,10 +163,7 @@ acc_Pois_fSuSiE2 <- function(Y,
       EBmvFR.obj   <-  EBmvFR ( Y=tmp_Mu_pm_pen,
                                 X              = Z,
                                 tol            = tol.mrash,
-                                lowc_wc        = lowc_wc  ,
-                                init_pi0_w     = init_pi0_w.mrash ,
-                                control_mixsqp = control_mixsqp ,
-                                indx_lst       = indx_lst,
+                                control_mixsqp = control_mixsqp  ,
                                 nullweight     = nullweight.mrash,
                                 cal_obj        = cal_obj.mrash,
                                 verbose        = FALSE,
@@ -179,11 +173,11 @@ acc_Pois_fSuSiE2 <- function(Y,
       if(verbose){
         print( paste('Posterior of EB regression coefficient computed for iter ',iter))
       }
-      b_pm <-   Z%*%  EBmvFR.obj$fitted_wc[[1]]
+      b_pm <-   Z%*%  EBmvFR.obj$fitted_func
 
       if( fit_approach== "penalized")
-        mat_mean <-   matrix( t_mean_EBmvFR , byrow = TRUE,
-                              nrow=nrow(X), ncol=ncol(Y))
+        mat_mean <-   matrix(b_pm  , byrow = TRUE,
+                              nrow=nrow(Z), ncol=ncol(Y))
 
     }else{
       b_pm <- 0* tmp_Mu_pm_pen
