@@ -10,7 +10,8 @@ pois_mean_split(
   sigma2 = NULL,
   est_sigma2 = TRUE,
   tol = 1e-05,
-  maxiter = 1000,
+  maxiter = 20,
+  cal_obj = FALSE,
   ebnm_params = NULL,
   mu_pm_init = NULL
 )

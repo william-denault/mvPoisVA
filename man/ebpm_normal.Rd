@@ -10,10 +10,10 @@ ebpm_normal(
   g_init = NULL,
   fix_g = FALSE,
   q_init = NULL,
-  maxiter = 1000,
+  maxiter = 20,
   tol = 1e-05,
   vga_tol = 1e-05,
-  conv_type = "elbo",
+  conv_type = "sigma2abs",
   return_sigma2_trace = FALSE
 )
 }
