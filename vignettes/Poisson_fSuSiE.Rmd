@@ -130,17 +130,17 @@ Y <- count.data
 Fine mapping the effect
 
 ```{r}
-res01 <-acc_Pois_fSuSiE2 (Y=Y,X=X, L=3 , post_processing = "HMM")
+res01 <-acc_Pois_fSuSiE2 (Y=Y,X=X, L=3  )
 res01$susiF.obj$cs
 ```
 Estimated effect
 
 ```{r}
 
-plot ( exp( res01$susiF.obj$fitted_func[[2]]  )-1, type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
-lines(lf[[1]])
+plot ( res01$susiF.obj$fitted_func[[2]]  , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
+lines(lf[[2]])
 
-plot (exp( res01$susiF.obj$fitted_func[[1]]  )-1 , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
-lines(lf[[2]] )
+plot ( res01$susiF.obj$fitted_func[[1]]    , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
+lines(lf[[1]] )
 ```
  
