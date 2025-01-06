@@ -201,7 +201,7 @@ acc_Pois_fSuSiE2 <- function(Y,
         min_purity      = min_purity,
         maxit           = maxit.fsusie ,
         cor_small       = cor_small,
-        post_processing = "HMM")
+        post_processing = post_processing)
 
 
 
