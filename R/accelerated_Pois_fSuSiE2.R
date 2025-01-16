@@ -9,6 +9,7 @@ acc_Pois_fSuSiE2 <- function(Y,
                             Z,
                             X,
                             L=3,
+                            scaling= NULL,
                             ebps_method=c('pois_mean_split',
                                           'ind_pois_mean_split',
                                           'ind_ebps',
@@ -39,7 +40,7 @@ acc_Pois_fSuSiE2 <- function(Y,
                             verbose.mrash=TRUE,
                             maxit.mrash=10,
                             cal_obj.mrash=FALSE,
-                            maxit.fsusie=50,
+                            maxit.fsusie=100,
                             cal_obj.fsusie=FALSE,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
@@ -95,6 +96,13 @@ acc_Pois_fSuSiE2 <- function(Y,
       Z <- Z[,-tidx]
     }
   }
+  if( is.null( scaling)){
+    scaling = rep(1, nrow(Y))
+  }else{
+    if( ! (length(scaling)== nrow(Y))){
+      warning(paste("scaling shoudl have a length equal to number of row  in Y"  ))
+    }
+  }
 
   indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
 
@@ -117,28 +125,35 @@ acc_Pois_fSuSiE2 <- function(Y,
   ##### Poisson Part ----
 
   if (ebps_method =="pois_mean_split" ){
-    tt <- pois_mean_split(c(Y),
-                                  mu_pm_init= c(Mu_pm_init))
-
+    tt <- pois_mean_split(c(Y),s= rep( scaling, ncol(Y)),
+                          mu_pm_init= c(Mu_pm_init))
     Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
   }
   if(ebps_method =="ind_pois_mean_split" ){
-    Mu_pm <- matrix(apply(Y,1, function(y) pois_mean_split(y,
-                                                           mu_pm_init= c(log(y+1)) )$posterior$mean_log),
-                    byrow = TRUE,
-                    ncol=ncol(Y))
+
+   Mu_pm <-0*Y
+    for ( i in 1:nrow(Y)){
+     Mu_pm[i,]     =   pois_mean_split(Y[i,],s=scaling[i],
+                                       mu_pm_init= c(log(Y[i,]+1)) )$posterior$mean_log
+    }
   }
 
   if(ebps_method =="ind_ebps" ){
-    Mu_pm <- matrix(apply(Y,1, function(y) ebps(y)$posterior$mean_log),
-                    byrow = TRUE,
-                    ncol=ncol(Y))
+
+
+    Mu_pm <-0*Y
+    for ( i in 1:nrow(Y)){
+      Mu_pm[i,]     =  ebps(Y[i,],s=scaling[i])$posterior$mean_log
+    }
   }
  if(ebps_method =="ind_poisson_smoothing" ){
-    Mu_pm <- matrix(apply(Y,1, function(y) pois_smooth_split(y,
-                                                             Eb_init= c(log(y+1)) )$posterior$mean_log),
-                    byrow = TRUE,
-                    ncol=ncol(Y))
+
+   Mu_pm <-0*Y
+   for ( i in 1:nrow(Y)){
+     Mu_pm[i,]     =  log(pois_smooth_split(Y[i,],s=scaling[i],
+                                        Eb_init= c(log(Y[i,]+1)) ) $Emean)
+   }
+
   }
   if (ebps_method =="nugget" ){
     Mu_pm <- (fit_latent_nugget(Y)$Y)

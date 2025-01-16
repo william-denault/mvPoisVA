@@ -33,7 +33,7 @@ set.seed(1)
 data(N3finemapping)
 X <- N3finemapping$X
 mysd=0.5
-N =70
+N =200
 genotype <-X[1:N,1:100]
 data(N3finemapping)
 X <- N3finemapping$X
@@ -72,11 +72,11 @@ count.data  <- list()
 L <-2# sample(1:2, size =1)#actual number of effect
 
 lf <-  list()
-lf[[1]]<- rep(0.1, 2^6)
-lf[[1]][10:20] <-2
+lf[[1]]<- cos((1:2^6) /(0.5*2^6))# #rep(0.1, 2^6)
+#lf[[1]][10:20] <-2
 
-lf[[2]]<- rep(0.1, 2^6)
-lf[[2]][50:60] <-2
+lf[[2]]<-sin((1:2^6) /(0.5*2^6)) # rep(0.1, 2^6)
+#lf[[2]][50:60] <-2
 
 true_pos <- sample(1:ncol(genotype), replace = FALSE,size=2)
 
@@ -130,7 +130,8 @@ Y <- count.data
 Fine mapping the effect
 
 ```{r}
-res01 <-acc_Pois_fSuSiE2 (Y=Y,X=X, L=3  )
+res01 <-acc_Pois_fSuSiE2 (Y=Y,X=X, L=3, post_processing = "TI" ,
+                           ebps_method='ind_ebps')
 res01$susiF.obj$cs
 ```
 Estimated effect
@@ -143,4 +144,16 @@ lines(lf[[2]])
 plot ( res01$susiF.obj$fitted_func[[1]]    , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
 lines(lf[[1]] )
 ```
- 
+```{r}
+res02 <-fsusieR::susiF (Y=log(Y+1),X=X, L=3, post_processing = "TI"  )
+res02$susiF.obj$cs
+```
+
+```{r}
+
+plot ( res02$ fitted_func[[2]]  , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
+lines(lf[[2]])
+
+plot ( res02 $fitted_func[[1]]    , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
+lines(lf[[1]] )
+```

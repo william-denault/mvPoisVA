@@ -11,15 +11,16 @@ vignette: >
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 5,
-  fig.height = 3,
-  fig.align = "center",
-  fig.cap = "&nbsp;",
-  dpi = 175
-  )
+#knitr::opts_chunk$set(
+#  collapse = TRUE,
+#  comment = "#>",
+#  fig.width = 1,
+#  fig.height =6,
+#  fig.align = "center",
+#  fig.cap = "&nbsp;",
+#  dpi = 300
+#  )
+knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Generate data
 
@@ -31,7 +32,7 @@ library(susieR)
 #example from Dongyue Xie work
  set.seed(12345)
  n=2^9
- sigma=0.5
+ sigma=1
  mu=c(rep(0.3,n/4), rep(3, n/4), rep(10, n/4), rep(0.3, n/4))
   plot(mu, type="l", main="Underlying intensity")
 
@@ -41,7 +42,7 @@ library(susieR)
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
+```{r  , echo=FALSE}
 set.seed(123)
 x = rpois(length(mu),exp(log(mu)+rnorm(n=length(mu),sd=sigma)))
 plot(mu, type="l", main="Underlying intensity")
@@ -60,6 +61,7 @@ lines(mu, lwd=1.5)
 legend(x="topleft", legend=c("Poisson smoothing", "EBPS", "Split Poisson", "Haar-Fisz", "True"),
                     col=c("blue3", "orange2", "magenta", "darkgreen", "black"), 
        lwd=1.5)
+  
  
 ```
 
@@ -68,4 +70,75 @@ legend(x="topleft", legend=c("Poisson smoothing", "EBPS", "Split Poisson", "Haar
 sqrt(fit_ebps$fitted_g$sigma2)
 sqrt(fit$sigma2)
 ```
+
+
+
+
+
+##  adding scaling parameter
+```{r  , echo=FALSE}
+set.seed(123)
+s=1.2
+x = rpois(length(mu),s*exp(log(mu)+rnorm(n=length(mu),sd=sigma)))
+plot(mu, type="l", main="Underlying intensity")
+fit_scaled = pois_smooth_split(x,maxiter=30,s=s)
+fit_ebps_scaled = ebps(x,s=s)
+fit_pois_scaled = pois_mean_split(x,s=s)
+#plot(x,col='grey80')
+#lines(fit_pois_scaled$posterior$mean, col= "magenta", lwd=.5)
+
+plot(fit_ebps_scaled$posterior$mean_smooth, col= "orange2", lwd=1.5)
+lines(exp(fit_scaled$Eb), col= "blue3", lwd=1.5)
+lines( smashr::smash(haarfisz::hft(x))  , col="darkgreen", lwd=1.5)
+
+
+lines(mu, lwd=1.5) 
+legend(x="topleft", legend=c("Poisson smoothing", "EBPS", "Split Poisson", "Haar-Fisz", "True"),
+                    col=c("blue3", "orange2", "magenta", "darkgreen", "black"), 
+       lwd=1.5)
+  
+```
+
+
+
+
+```{r}
+plot (fit_pois_scaled$posterior$mean,fit_pois $posterior$mean, col= "magenta" )
+
+points(fit_ebps_scaled$posterior$mean_smooth, fit_ebps $posterior$mean_smooth,col= "orange2" )
+points(exp(fit_scaled$Eb), exp(fit $Eb),col= "blue3" ) 
+abline(a=0,b=1)
+```
+
+
+
+```{r}
+set.seed(123)
+s=1.2
+x = rpois(length(mu),s*exp(log(mu)+rnorm(n=length(mu),sd=sigma)))
+plot(mu, type="l", main="Underlying intensity")
+fit_unscaled = pois_smooth_split(x,maxiter=30 )
+fit_ebps_unscaled = ebps(x )
+fit_pois_unscaled = pois_mean_split(x )
+plot (fit_pois_scaled$posterior$mean,fit_pois_unscaled $posterior$mean, col= "magenta" )
+
+plot(fit_ebps_scaled$posterior$mean_smooth, fit_ebps_unscaled $posterior$mean_smooth,col= "orange2" )
+points(exp(fit_scaled$Eb), exp(fit_unscaled $Eb),col= "blue3" ) 
+abline(a=0,b=1)
+```
+
+```{r} 
+set.seed(123)
+s=1.2
+x = rpois(length(mu),s*exp(log(mu)+rnorm(n=length(mu),sd=sigma)))
+plot(mu, type="l", main="Underlying intensity")
+fit_unscaled = pois_smooth_split(x/s,maxiter=30 )
+fit_ebps_unscaled = ebps(x/s )
+fit_pois_unscaled = pois_mean_split(x/s )
+plot (fit_pois_scaled$posterior$mean,fit_pois_unscaled $posterior$mean, col= "magenta" )
+
+plot (fit_ebps_scaled$posterior$mean_smooth, fit_ebps_unscaled $posterior$mean_smooth,col= "orange2" )
+points(exp(fit_scaled$Eb), exp(fit_unscaled $Eb),col= "blue3" ) 
+abline(a=0,b=1)
+``` 
 
