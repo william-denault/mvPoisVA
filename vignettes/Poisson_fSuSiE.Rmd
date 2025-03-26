@@ -136,7 +136,7 @@ res01$susiF.obj$cs
 ```
 Estimated effect
 
-```{r}
+```{r}http://127.0.0.1:10581/graphics/1059f859-888f-47b3-8cde-dd1b3880f948.png
 
 plot ( res01$susiF.obj$fitted_func[[2]]  , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
 lines(lf[[2]])
@@ -144,6 +144,9 @@ lines(lf[[2]])
 plot ( res01$susiF.obj$fitted_func[[1]]    , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
 lines(lf[[1]] )
 ```
+
+
+
 ```{r}
 res02 <-fsusieR::susiF (Y=log(Y+1),X=X, L=3, post_processing = "TI"  )
 res02$susiF.obj$cs

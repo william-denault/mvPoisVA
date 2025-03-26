@@ -61,7 +61,7 @@ if( length(which(apply(G,2,var)==0))>0){
   G <- G[,-which(apply(G,2,var)==0)]
 }
 # G <- matrix( rnorm(nrow(genotype)*300), nrow = nrow(genotype))
-scaling= runif( n= N, min=0.8,max=1.3)
+scaling= 0*runif( n= N, min=0.8,max=1.3)+1
 
 predictor <-rep (0, length(lf[[1]] ))
 count.data  <- list()
@@ -127,6 +127,10 @@ res03 <-acc_Pois_fSuSiE2 (Y=Y,X=X, L=3, post_processing = "TI" ,  scaling=scalin
                           ebps_method='ind_ebps')
 res03$susiF.obj$cs
 
+res031 <-acc_Pois_fSuSiE2 (Y=Y/scaling,X=X, L=3, post_processing = "TI" ,
+                          ebps_method='ind_ebps')
+res031$susiF.obj$cs
+
 
 plot ( res03$susiF.obj$fitted_func[[2]]  , type="l", main=paste ( "effect of SNP",true_pos[2]), col= "green4")
 lines(lf[[2]])
@@ -150,6 +154,9 @@ lines(res03$susiF.obj$fitted_func[[2]], col="red")
 lines(res03$susiF.obj$cred_band[[2]][1,], col="red", lty =2)
 lines(res03$susiF.obj$cred_band[[2]][2,], col="red", lty =2)
 
+lines(res031$susiF.obj$fitted_func[[2]], col="darkred")
+lines(res031$susiF.obj$cred_band[[2]][1,], col="darkred", lty =2)
+lines(res031$susiF.obj$cred_band[[2]][2,], col="darkred", lty =2)
 
 lines(res01$susiF.obj$fitted_func[[2]], col="blue")
 lines(res01$susiF.obj$cred_band[[2]][1,], col="blue", lty =2)

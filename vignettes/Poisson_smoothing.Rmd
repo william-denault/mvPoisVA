@@ -45,25 +45,52 @@ You can also embed plots, for example:
 ```{r  , echo=FALSE}
 set.seed(123)
 x = rpois(length(mu),exp(log(mu)+rnorm(n=length(mu),sd=sigma)))
-plot(mu, type="l", main="Underlying intensity")
+ 
 fit = pois_smooth_split(x,maxiter=30)
 fit_ebps = ebps(x)
 fit_pois = pois_mean_split(x)
-plot(x,col='grey80')
-lines(fit_pois$posterior$mean, col= "magenta", lwd=.5)
-
+plot(mu, type="l",main="Underlying intensity")
+ 
 lines(fit_ebps$posterior$mean_smooth, col= "orange2", lwd=1.5)
-lines(exp(fit$Eb), col= "blue3", lwd=1.5)
-lines( smashr::smash(haarfisz::hft(x))  , col="darkgreen", lwd=1.5)
+lines(exp(fit$Eb), col= "blue3", lwd=1.5) 
 
 
 lines(mu, lwd=1.5) 
-legend(x="topleft", legend=c("Poisson smoothing", "EBPS", "Split Poisson", "Haar-Fisz", "True"),
-                    col=c("blue3", "orange2", "magenta", "darkgreen", "black"), 
+legend(x="topleft", legend=c("Poisson smoothing", "EBPS", "Split Poisson",   "True"),
+                    col=c("blue3", "orange2",   "darkgreen", "black"), 
        lwd=1.5)
   
  
 ```
+
+```{r}
+plot(log(x+1) ,log(fit_pois$posterior$mean+1)  )
+abline(a=0,b=1)
+```
+
+
+
+```{r}
+plot(log(mu+1) ,log(fit_pois$posterior$mean+1)  )
+abline(a=0,b=1)
+```
+
+
+
+
+```{r}
+plot(log(x+1) ,log(fit_ebps$posterior$mean_smooth+1  ))
+abline(a=0,b=1)
+```
+
+
+```{r}
+plot(log(mu+1) ,log(fit_ebps$posterior$mean_smooth+1  ))
+abline(a=0,b=1)
+```
+
+
+
 
 
 ```{r ,Estimated over-dispersion stansard deviation}
