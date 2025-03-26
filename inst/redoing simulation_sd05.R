@@ -19,7 +19,7 @@ if(file.exists("C:/Document/Serieux/Travail/Package/mvPoisVA/simredoing_mv_sd_0.
 
 
 for( o in (length(res_list)+1):300){
-  set.seed(length(res_list)+1)
+  set.seed(length(res_list)+2)
 
   genotype <-X
   data(N3finemapping)
