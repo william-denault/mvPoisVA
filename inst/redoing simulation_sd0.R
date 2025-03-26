@@ -10,8 +10,13 @@ X <- N3finemapping$X
 mysd=0
 N =200
 
+if(file.exists("C:/Document/Serieux/Travail/Package/mvPoisVA/simredoing_mv_sd_0.RData")){
+  load("C:/Document/Serieux/Travail/Package/mvPoisVA/simredoing_mv_sd_0.RData")
+}else{
 
-res_list=list()
+  res_list=list()
+}
+
 
 
 for( o in (length(res_list)+1):300){
