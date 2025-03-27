@@ -7,16 +7,15 @@ library(ebnm)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 data(N3finemapping)
 X <- N3finemapping$X
-mysd=0.5
+mysd=2
 N =200
 
-if(file.exists("C:/Document/Serieux/Travail/Package/mvPoisVA/simredoing_mv_sd_0.5.RData")){
-  load("C:/Document/Serieux/Travail/Package/mvPoisVA/simredoing_mv_sd_0.5.RData")
+if(file.exists("C:/Document/Serieux/Travail/Package/mvPoisVA/simredoing_mv_sd_2.RData")){
+  load("C:/Document/Serieux/Travail/Package/mvPoisVA/simredoing_mv_sd_2.RData")
 }else{
 
   res_list=list()
 }
-
 
 for( o in (length(res_list)+1):300){
   set.seed(length(res_list)+2)
@@ -163,8 +162,7 @@ for( o in (length(res_list)+1):300){
 
   res_list[[o]] <-unlist(out)
 
- # print(do.call(rbind, res_list))
+  print(do.call(rbind, res_list))
 
-  save(res_list, file="simredoing_mv_sd_05.RData")
 }
-
+save(res_list, file="simredoing_mv_sd_2.RData")
