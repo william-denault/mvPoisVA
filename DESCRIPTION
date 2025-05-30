@@ -11,9 +11,9 @@ Depends:
     fsusieR (>= 0.2.97),
     haarfisz,
     ebnm,
-    wavethresh (>= 4.6.8)
-Suggests:
     smashr,
+    wavethresh (>= 4.6.8)
+Suggests: 
     testthat (>= 3.0.0)
 License: MIT
 Encoding: UTF-8

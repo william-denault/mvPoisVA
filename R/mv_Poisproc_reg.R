@@ -1,7 +1,8 @@
 
 
 
-#' @export
+#' Implementation of the Poisson fSuSiE
+#' # using the Poisson multiscale approach use in multiseq by Shim et al 2024
 
 
 mv_Poisproc_reg <- function(Y,
@@ -148,7 +149,7 @@ mv_Poisproc_reg <- function(Y,
                                  Y_tot       = Y_tot,
                                  sigma2_bin  = 1/sigma2_bin,
                                  sigma2_pois =   1/sigma2_pois,
-                                 b_pm        =Mu_pm,
+                                 b_pm        = Mu_pm,
                                  gh_points   = gh_points,
                                  tol         = tol_vga_pois)
     if(verbose){

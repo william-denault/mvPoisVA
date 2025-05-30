@@ -83,6 +83,13 @@ table(sum_res$overlapp[-idx])[1]
 
 idx= which (sum_res$n_cs_fsusie==0 | sum_res$n_cs_mv_pois==0)
 apply(sum_res[-idx,], 2, sum)
+apply(sum_res[-idx,], 2, mean)
+
+length(which(sum_res[,1]==0))
+length(which(sum_res[,3]==0))
+
+which (sum_res$n_cs_fsusie==0 & !(sum_res$n_cs_mv_pois==0))
+
 source("C:/Document/Serieux/Travail/Data_analysis_and_papers/GTEX_analysis_Fsusie/code/plot_log.R")
 
 # example where mv POIS found effect -----

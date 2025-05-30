@@ -9,6 +9,7 @@ Pois_fSuSiE <- function(Y,
                             Z,
                             X,
                             L=3,
+                            scaling= NULL,
                             L_start=3,
                             reflect =FALSE,
                             verbose=TRUE,
@@ -38,9 +39,9 @@ Pois_fSuSiE <- function(Y,
                             cal_obj.fsusie=FALSE,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
-                            cor_small=TRUE,
-                            max.iter=3,
-                        nugget=FALSE
+                            cor_small=FALSE,
+                            max.iter=3
+
 )
 {
   ####Changer les calcul d'objective -----
@@ -88,6 +89,13 @@ Pois_fSuSiE <- function(Y,
       Z <- Z[,-tidx]
     }
   }
+  if( is.null( scaling)){
+    scaling = rep(1, nrow(Y))
+  }else{
+    if( ! (length(scaling)== nrow(Y))){
+      warning(paste("scaling shoudl have a length equal to number of row  in Y"  ))
+    }
+  }
 
   indx_lst <-  fsusieR::gen_wavelet_indx(log2(ncol(Y)))
 
@@ -103,21 +111,26 @@ Pois_fSuSiE <- function(Y,
   iter=1
   beta_pois <- 0* c(log(Mu_pm +1))
   check <- 3*tol
-  sigma2_pois=1
-  Mu_pm_init <- log(Mu_pm+1)
+
+  b_pm <- 0* Mu_pm
+  fm_pm <- 0* Mu_pm
+
   while( check >tol & iter <max.iter ){
 
 
 
-    if (!nugget){
+    if ( iter ==1 ){
+      tt= ebpm_normal(c(Y),s= rep( scaling, ncol(Y)) )
+      Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
+    }else{
+
+
+
       tt <- pois_mean_split(c(Y),mu_pm_init= c(Mu_pm_init),
                                    est_sigma2 = sigma2_pois )
 
       Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
       Mu_pv <- matrix( tt$posterior$var_log,byrow = FALSE, ncol=ncol(Y))
-    }else{
-
-      Mu_pm <- (fit_latent_nugget(Y)$Y)
     }
 
 
@@ -129,13 +142,9 @@ Pois_fSuSiE <- function(Y,
 
 
 
-    b_pm <- 0* Mu_pm
-    fm_pm <- 0* Mu_pm
 
 
-
-print("here1")
-    if(init){
+     if(init){
 
       tmp_Mu_pm <- fsusieR::colScale(Mu_pm, scale = FALSE)#potentially run smash on colmean
       lowc_wc <-  which_lowcount(tmp_Mu_pm,
@@ -257,6 +266,7 @@ print("here1")
         min_purity      = min_purity,
         maxit           = maxit.fsusie ,
         cor_small       = cor_small,
+        maxit           = maxit.fsusie,
         post_processing = "HMM")
 
 

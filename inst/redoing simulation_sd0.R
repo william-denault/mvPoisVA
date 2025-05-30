@@ -4,6 +4,7 @@ library(mvPoisVA)
 library(fsusieR)
 library(susieR)
 library(ebnm)
+library(haarfisz)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 data(N3finemapping)
 X <- N3finemapping$X
@@ -40,8 +41,8 @@ for( o in (length(res_list)+1):300){
   G<- genotype
   X <- (X -0.99*min(X))/(0.5*max(X ))
 
-  G <-  (G -0.99*min(G ))/(0.5*max(G ))
-
+  G <-  (G -0.99*min(G ))
+  G <-G/(0.5*max(G))
 
 
 
@@ -106,14 +107,16 @@ for( o in (length(res_list)+1):300){
   }
   count.data <- do.call(rbind, count.data)
 
-hist(Y)
+
   Y <- count.data
+  hist(Y)
   res01 <-acc_Pois_fSuSiE2 (Y=Y,X=X, L=5, post_processing = "TI" ,
                             ebps_method='ind_ebps')
   m1= res01$susiF.obj
 
 
   m2 <-fsusieR::susiF (Y=log(Y+1),X=X, L=5, post_processing = "TI"  )
+  m3 <-HF_susiF2  (Y=log(Y+1),X=X, L=5, post_processing = "TI"  )
 
   cal_purity <- function(l_cs,X){
     tt <- list()
@@ -148,6 +151,14 @@ hist(Y)
             ),#number of CS without any effect
             cal_purity(m2$cs, X=as.matrix(G)),#mean purity
             mean(sapply( m2$cs, length)), #CS size
+            length(m3$cs),
+            length(which(true_pos%in% do.call(c, m3$cs))),
+            Reduce("+",sapply(1:length(m2$cs), function(k)
+              ifelse( length(which(true_pos%in%m3$cs[[k]] ))==0, 1,0)
+            )
+            ),#number of CS without any effect
+            cal_purity(m3$cs, X=as.matrix(G)),#mean purity
+            mean(sapply( m3$cs, length)), #CS size
             L)
 
 
@@ -160,7 +171,13 @@ hist(Y)
                "true_cs",
                "false_cs",
                "purity",
-               "cs_len","L")
+               "cs_len",
+               "ncs_HF",
+               "true_cs_HF",
+               "false_cs_HF",
+               "purity_HF",
+               "cs_len_HF",
+               "L")
 
   res_list[[o]] <-unlist(out)
 

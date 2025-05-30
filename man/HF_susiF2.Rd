@@ -2,7 +2,7 @@
 % Please edit documentation in R/HF_fsusie2.R
 \name{HF_susiF2}
 \alias{HF_susiF2}
-\title{Sum of Single Function (SuSiF)}
+\title{Sum of Single Function (SuSiF) with Haar Fizs transform}
 \usage{
 HF_susiF2(
   Y,
@@ -108,68 +108,8 @@ HF_susiF2(
 The function returns a list containing the SuSiF results and related components.
 }
 \description{
-This function implements the SuSiF method for analyzing functional phenotypes using wavelet-based techniques.
+This function implements the SuSiF method for analyzing functional phenotypes using wavelet-based techniques using Haar Fisz transform for Poisson data.
 }
 \details{
 The SuSiF method is designed to work with functional phenotypes, where the underlying algorithm employs wavelets. This function accommodates various parameters for fine-tuning the analysis, such as specifying priors, convergence tolerance, and effect-fitting bounds.
-}
-\examples{
-library(ashr)
-library(wavethresh)
-set.seed(1)
-# Example using curves simulated under the Mixture Normal Per Scale prior
-rsnr <- 0.2 # Expected root signal-to-noise ratio
-N <- 100    # Number of individuals
-P <- 10     # Number of covariates/SNPs
-pos1 <- 1   # Position of the causal covariate for effect 1
-pos2 <- 5   # Position of the causal covariate for effect 2
-lev_res <- 7 # Length of the molecular phenotype (2^lev_res)
-f1 <- simu_IBSS_per_level(lev_res)$sim_func # First effect
-f2 <- simu_IBSS_per_level(lev_res)$sim_func # Second effect
-
-plot(f1, type ="l", ylab="effect", col="blue")
-abline(a=0, b=0)
-lines(f2, type="l", col="green")
-
-legend(x=100, y=3, lty=rep(1,3), legend=c("effect 1", "effect 2"), col=c("black","blue","yellow"))
-G <- matrix(sample(c(0, 1, 2), size=N*P, replace=TRUE), nrow=N, ncol=P) # Genotype matrix
-beta0 <- 0
-beta1 <- 1
-beta2 <- 1
-noisy.data <- list()
-
-for (i in 1:N) {
-  f1_obs <- f1
-  f2_obs <- f2
-  noise <- rnorm(length(f1), sd=(1/rsnr) * var(f1))
-  noisy.data[[i]] <- beta1 * G[i, pos1] * f1_obs + beta2 * G[i, pos2] * f2_obs + noise
-}
-noisy.data <- do.call(rbind, noisy.data)
-
-plot(noisy.data[1,], type="l", col=(G[1, pos1]*3+1), main="Observed curves\ncolored by the causal effect", ylim=c(-40,40), xlab="")
-for (i in 2:N) {
-  lines(noisy.data[i,], type="l", col=(G[i, pos1]*3+1))
-}
-legend(x=0.3, y=-10, lty=rep(1,3), legend=c("0", "1", "2"), col=c("black", "blue", "yellow"))
-
-Y <- noisy.data
-X <- G
-# Running SuSiF
-out <- susiF(Y, X, L=2, prior='mixture_normal_per_scale')
-# Visualizing the result
-plot_susiF(out)
-
-# Accessing the output of SuSiF directly
-par(mfrow=c(1,2))
-plot(f1, type="l", main="Estimated effect 1", xlab="")
-lines(unlist(out$fitted_func[[1]]), col='blue')
-abline(a=0, b=0)
-legend(x=35, y=3, lty=rep(1,2), legend=c("effect 1","fSuSiE est"), col=c("black","blue"))
-plot(f2, type="l", main="Estimated effect 2", xlab="")
-lines(unlist(out$fitted_func[[2]]), col='green')
-abline(a=0, b=0)
-legend(x=20, y=-1.5, lty=rep(1,2), legend=c("effect 2","fSuSiE est"), col=c("black","green"))
-par(mfrow=c(1,1))
-plot_susiF(out)
-
 }

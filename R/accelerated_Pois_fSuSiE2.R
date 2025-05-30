@@ -10,7 +10,8 @@ acc_Pois_fSuSiE2 <- function(Y,
                             X,
                             L=3,
                             scaling= NULL,
-                            ebps_method=c('pois_mean_split',
+                            ebps_method=c("ebpm",
+                                          'pois_mean_split',
                                           'ind_pois_mean_split',
                                           'ind_ebps',
                                           'ind_poisson_smoothing',
@@ -49,6 +50,10 @@ acc_Pois_fSuSiE2 <- function(Y,
 
 )
 {
+
+
+  print("depreciated version of Poisson-fsusie, kept for backward compatibility,
+        please use Pois_fSuSiE function")
   ####Changer les calcul d'objective -----
   if(missing(X)&missing(Z)){
     stop("Please provide a Z or a X matrix")
@@ -124,6 +129,10 @@ acc_Pois_fSuSiE2 <- function(Y,
   Mu_pm_init <- log(Mu_pm+1)
   ##### Poisson Part ----
 
+  if (ebps_method =="ebpm" ){
+    tt <- ebpm_normal(c(Y),s= rep( scaling, ncol(Y)) )
+    Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
+  }
   if (ebps_method =="pois_mean_split" ){
     tt <- pois_mean_split(c(Y),s= rep( scaling, ncol(Y)),
                           mu_pm_init= c(Mu_pm_init))
