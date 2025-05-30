@@ -49,7 +49,6 @@ Pois_fSuSiE <- function(Y,
     stop("Please provide a Z or a X matrix")
   }
 
-
   fit_approach <- "both"
   if(missing(X)){
     print("No correlated covariate provided, the algorithm will perform penalized regression only")
@@ -61,6 +60,7 @@ Pois_fSuSiE <- function(Y,
 
   }
 
+  print(  fit_approach)
   ##initiatilzation -----
   init=TRUE
   J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
@@ -74,6 +74,7 @@ Pois_fSuSiE <- function(Y,
   #### to avoid 0 in Y_min to correct at the end
   Y <- Y
 
+
   if(fit_approach %in% c('both',"fine_mapping")){
     tidx <- which(apply(X,2,var)==0)
     if( length(tidx)>0){
@@ -82,6 +83,7 @@ Pois_fSuSiE <- function(Y,
     }
     X <- fsusieR:::colScale(X)
   }
+
   if(fit_approach %in% c('both',"penalized")){
     tidx <- which(apply(Z,2,var)==0)
     if( length(tidx)>0){
@@ -89,6 +91,7 @@ Pois_fSuSiE <- function(Y,
       Z <- Z[,-tidx]
     }
   }
+
   if( is.null( scaling)){
     scaling = rep(1, nrow(Y))
   }else{
@@ -115,13 +118,15 @@ Pois_fSuSiE <- function(Y,
   b_pm <- 0* Mu_pm
   fm_pm <- 0* Mu_pm
 
-  while( check >tol & iter <max.iter ){
 
+  while( check >tol & iter <=  max.iter ){
 
 
     if ( iter ==1 ){
       tt= ebpm_normal(c(Y),s= rep( scaling, ncol(Y)) )
       Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
+
+
     }else{
 
 
@@ -264,7 +269,7 @@ Pois_fSuSiE <- function(Y,
         verbose         = verbose,
         cov_lev         = cov_lev,
         min_purity      = min_purity,
-        maxit           = maxit.fsusie ,
+
         cor_small       = cor_small,
         maxit           = maxit.fsusie,
         post_processing = "HMM")
