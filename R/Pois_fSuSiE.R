@@ -13,7 +13,6 @@ Pois_fSuSiE <- function(Y,
                             L_start=3,
                             reflect =FALSE,
                             verbose=TRUE,
-                            n_gh = 10,
                             init_b_pm,
                             tol= 1e-3,
                             tol_vga_pois=1e-5,
@@ -24,6 +23,7 @@ Pois_fSuSiE <- function(Y,
                             ),
                             thresh_lowcount=1e-2,
                             prior_mv=  "mixture_normal_per_scale",
+                            post_processing=c("smash","TI","HMM","none"),
                             gridmult=sqrt(2),
                             nullweight.mrash=10,
                             init_pi0_w.mrash=10,
@@ -40,8 +40,9 @@ Pois_fSuSiE <- function(Y,
                             max_SNP_EM     = 100,
                             max_step_EM    = 1,
                             cor_small=FALSE,
-                            max.iter=3
-
+                            max.iter=3,
+                        init_pi0_w=1,
+                            nullweight_fsusie= .001
 )
 {
   ####Changer les calcul d'objective -----
@@ -60,7 +61,6 @@ Pois_fSuSiE <- function(Y,
 
   }
 
-  print(  fit_approach)
   ##initiatilzation -----
   init=TRUE
   J = log2(ncol(Y)); if((J%%1) != 0) reflect=TRUE
@@ -82,6 +82,7 @@ Pois_fSuSiE <- function(Y,
       X <- X[,-tidx]
     }
     X <- fsusieR:::colScale(X)
+    names_colX <-  colnames(X)
   }
 
   if(fit_approach %in% c('both',"penalized")){
@@ -131,11 +132,10 @@ Pois_fSuSiE <- function(Y,
 
 
 
-      tt <- pois_mean_split(c(Y),mu_pm_init= c(Mu_pm_init),
-                                   est_sigma2 = sigma2_pois )
-
-      Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
-      Mu_pv <- matrix( tt$posterior$var_log,byrow = FALSE, ncol=ncol(Y))
+      tt <-    pois_mean_GG(c(Y), prior_mean = c(Mu_pm_init),
+                            prior_var = sigma2_pois )
+      Mu_pm <- matrix( tt$posterior$posteriorMean_latent,byrow = FALSE, ncol=ncol(Y))
+      Mu_pv <- matrix( tt$posterior$posteriorVar_latent ,byrow = FALSE, ncol=ncol(Y))
     }
 
 
@@ -186,7 +186,7 @@ Pois_fSuSiE <- function(Y,
       }
       if(fit_approach %in%c("both","fine_mapping")){
 
-        temp <- fsusieR:: init_prior(Y              = tmp_Mu_pm,
+        temp <- fsusieR:: init_prior(    Y              = tmp_Mu_pm,
                                          X              = X ,
                                          prior          = prior_mv ,
 
@@ -256,8 +256,7 @@ Pois_fSuSiE <- function(Y,
 
     if(fit_approach%in% c("both", "fine_mapping")){
       tmp_Mu_pm_fm <- Mu_pm -  b_pm#potentially run smash on colmean
-
-
+      tmp_Mu_pm_fm <- fsusieR::colScale(tmp_Mu_pm_fm, scale=FALSE)
       susiF.obj     <- susiF (
         Y              =  tmp_Mu_pm_fm ,
         X               = X ,
@@ -273,6 +272,9 @@ Pois_fSuSiE <- function(Y,
         cor_small       = cor_small,
         maxit           = maxit.fsusie,
         post_processing = "HMM")
+
+
+
 
 
 
@@ -314,9 +316,9 @@ Pois_fSuSiE <- function(Y,
 
 
 
+
+
   tt_all <-exp(Mu_pm   )
-
-
 
 
 

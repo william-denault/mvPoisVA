@@ -1,0 +1,34 @@
+---
+title: "Usefullness_Gaussian_poisson"
+author: "William Denault"
+date: "2025-06-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+ 
+```{r cars}
+library(mvPoisVA)
+n=300
+x = rpois(n,exp(2*sin(1:n/20)))
+naive=pois_mean_GG(x)
+prior_base= pois_mean_GG(x,
+                         prior_mean = 2*sin(1:n/20),
+                         prior_var=rep(1, length(n)))
+                         
+```
+
+ 
+
+```{r }
+                         
+plot(prior_base$posterior$posteriorMean_latent, col="green", type="l")
+                         
+ lines(naive$posterior$posteriorMean_latent)
+points(2*sin(1:n/20), pch=19)
+                 
+```
+
+ In green the fitted with true mean prior in black without prior mean (full EB but not base pair specific) points are the true underlying intensity
