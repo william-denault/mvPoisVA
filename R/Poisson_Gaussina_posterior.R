@@ -179,12 +179,12 @@ pois_mean_GG1 = function(x,s,
 }
 
 #'calculate objective function
-pois_mean_GG1_obj = function(theta,x,s,beta,sigma2){
+pois_mean_GG1_obj = function(theta,x,s = NULL,beta,sigma2){
   return(-(x*theta[1]-s*exp(theta[1]+exp(theta[2])/2)-(theta[1]^2+exp(theta[2])-2*theta[1]*beta)/2/sigma2+log(exp(theta[2]))/2))
 }
 
 #'calculate gradient vector
-pois_mean_GG1_obj_gradient = function(theta,x,s,beta,sigma2){
+pois_mean_GG1_obj_gradient = function(theta,x,s = NULL,beta,sigma2){
   g1 = -(x-s*exp(theta[1]+exp(theta[2])/2)-theta[1]/sigma2+beta/sigma2)
   g2 = -(-exp(theta[2])/2*s*exp(theta[1]+exp(theta[2])/2) - exp(theta[2])/2/sigma2 + 1/2)
   return(c(g1,g2))

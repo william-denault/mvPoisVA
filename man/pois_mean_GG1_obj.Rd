@@ -4,7 +4,7 @@
 \alias{pois_mean_GG1_obj}
 \title{calculate objective function}
 \usage{
-pois_mean_GG1_obj(theta, x, s, beta, sigma2)
+pois_mean_GG1_obj(theta, x, s = NULL, beta, sigma2)
 }
 \description{
 calculate objective function

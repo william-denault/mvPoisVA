@@ -131,8 +131,9 @@ Pois_fSuSiE <- function(Y,
     }else{
 
 
-
-      tt <-    pois_mean_GG(c(Y), prior_mean = c(Mu_pm_init),
+      tt <-    pois_mean_GG(x=c(Y),
+                            prior_mean = c(Mu_pm_init),
+                            s =  rep( scaling, ncol(Y)),
                             prior_var = sigma2_pois )
       Mu_pm <- matrix( tt$posterior$posteriorMean_latent,byrow = FALSE, ncol=ncol(Y))
       Mu_pv <- matrix( tt$posterior$posteriorVar_latent ,byrow = FALSE, ncol=ncol(Y))
