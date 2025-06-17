@@ -127,11 +127,14 @@ Pois_fSuSiE <- function(Y,
       tt= ebpm_normal(c(Y),s= rep( scaling, ncol(Y)) )
       Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
 
-
+      pois_mean_GP(x=c(Y),
+                   prior_mean = 0*c(Y),
+                   s =  rep( scaling, ncol(Y)),
+                   prior_var = sigma2_pois )
     }else{
 
 
-      tt <-    pois_mean_GG(x=c(Y),
+      tt <-    pois_mean_GP(x=c(Y),
                             prior_mean = c(Mu_pm_init),
                             s =  rep( scaling, ncol(Y)),
                             prior_var = sigma2_pois )

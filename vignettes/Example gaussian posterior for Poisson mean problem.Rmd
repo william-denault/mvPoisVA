@@ -13,8 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(mvPoisVA)
 n=300
 x = rpois(n,exp(2*sin(1:n/20)))
-naive=pois_mean_GG(x)
-prior_base= pois_mean_GG(x,
+naive=pois_mean_GP(x)
+prior_base= pois_mean_GP(x,
                          prior_mean = 2*sin(1:n/20),
                          prior_var=rep(1, length(n)))
                          

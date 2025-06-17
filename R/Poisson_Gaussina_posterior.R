@@ -23,7 +23,7 @@
 #'\deqn{x_i\sim Poisson(\exp(\mu_i)),}
 #'\deqn{\mu_i\sim N(\beta,\sigma^2).}
 #'@export
-pois_mean_GG = function(x,
+pois_mean_GP = function(x,
                         s = NULL,
                         prior_mean = NULL,
                         prior_var=NULL,
@@ -72,8 +72,8 @@ pois_mean_GG = function(x,
       #   v[i] = temp$v
       # }
       opt = optim(c(m,log(v)),
-                  fn = pois_mean_GG_opt_obj,
-                  gr = pois_mean_GG_opt_obj_gradient,
+                  fn = pois_mean_GP_opt_obj,
+                  gr = pois_mean_GP_opt_obj_gradient,
                   x=x,
                   s=s,
                   beta=beta,
@@ -98,8 +98,8 @@ pois_mean_GG = function(x,
     #   v[i] = temp$v
     # }
     opt = optim(c(m,log(v)),
-                fn = pois_mean_GG_opt_obj,
-                gr = pois_mean_GG_opt_obj_gradient,
+                fn = pois_mean_GP_opt_obj,
+                gr = pois_mean_GP_opt_obj_gradient,
                 x=x,
                 s=s,
                 beta=beta,
@@ -121,16 +121,14 @@ pois_mean_GG = function(x,
   #return(list(posteriorMean=m,priorMean=beta,priorVar=sigma2,posteriorVar=v,obj_value=obj))
 
 }
-
 #'calculate objective function
-pois_mean_GG_opt_obj = function(theta,x,s,beta,sigma2,n){
+pois_mean_GP_opt_obj = function(theta,x,s,beta,sigma2,n){
   m = theta[1:n]
   v = theta[(n+1):(2*n)]
   return(-sum(x*m-s*exp(m+exp(v)/2)-(m^2+exp(v)-2*m*beta)/2/sigma2+v/2))
 }
-
 #'calculate gradient vector
-pois_mean_GG_opt_obj_gradient = function(theta,x,s,beta,sigma2,n){
+pois_mean_GP_opt_obj_gradient = function(theta,x,s,beta,sigma2,n){
   m = theta[1:n]
   v = theta[(n+1):(2*n)]
   g1 = -(x-s*exp(m+exp(v)/2)-m/sigma2+beta/sigma2)
@@ -142,52 +140,3 @@ pois_mean_GG_opt_obj_gradient = function(theta,x,s,beta,sigma2,n){
 pois_mean_GG_obj = function(x,s,beta,sigma2,m,v){
   return(sum(x*m-s*exp(m+v/2)-log(sigma2)/2-(m^2+v-2*m*beta+beta^2)/2/sigma2+log(v)/2))
 }
-
-#'@param x a data point
-#'@param beta prior mean
-#'@param sigma2 prior variance
-#'@param optim_method optimization method in `optim` function
-pois_mean_GG1 = function(x,s,
-                         beta,
-                         sigma2,
-                         optim_method = 'BFGS',
-                         m_init  = NULL,
-                         v_init = NULL){
-  # init m, v
-  if(is.null(m_init)){
-    m = 0
-  }else{
-    m = m_init
-  }
-
-  if(is.null(v_init)){
-    v = 1
-  }else{
-    v = v_init
-  }
-
-  opt = optim(c(m,log(v)),
-              fn = pois_mean_GG1_obj,
-              gr = pois_mean_GG1_obj_gradient,
-              x=x,
-              s=s,
-              beta=beta,
-              sigma2=sigma2,
-              method = optim_method)
-
-  return(list(m=opt$par[1],v=exp(opt$par[2]),obj=-opt$value))
-}
-
-#'calculate objective function
-pois_mean_GG1_obj = function(theta,x,s = NULL,beta,sigma2){
-  return(-(x*theta[1]-s*exp(theta[1]+exp(theta[2])/2)-(theta[1]^2+exp(theta[2])-2*theta[1]*beta)/2/sigma2+log(exp(theta[2]))/2))
-}
-
-#'calculate gradient vector
-pois_mean_GG1_obj_gradient = function(theta,x,s = NULL,beta,sigma2){
-  g1 = -(x-s*exp(theta[1]+exp(theta[2])/2)-theta[1]/sigma2+beta/sigma2)
-  g2 = -(-exp(theta[2])/2*s*exp(theta[1]+exp(theta[2])/2) - exp(theta[2])/2/sigma2 + 1/2)
-  return(c(g1,g2))
-}
-
-
