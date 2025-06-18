@@ -16,7 +16,6 @@ Pois_fSuSiE <- function(Y,
                             init_b_pm,
                             tol= 1e-3,
                             tol_vga_pois=1e-5,
-                            maxit=10,
                             control_mixsqp=  list(verbose=FALSE,
                                                   eps = 1e-6,
                                                   numiter.em = 4
@@ -42,7 +41,8 @@ Pois_fSuSiE <- function(Y,
                             cor_small=FALSE,
                             max.iter=3,
                         init_pi0_w=1,
-                            nullweight_fsusie= .001
+                            nullweight_fsusie= .001,
+                        print=FALSE
 )
 {
   ####Changer les calcul d'objective -----
@@ -127,10 +127,6 @@ Pois_fSuSiE <- function(Y,
       tt= ebpm_normal(c(Y),s= rep( scaling, ncol(Y)) )
       Mu_pm <- matrix( tt$posterior$mean_log,byrow = FALSE, ncol=ncol(Y))
 
-      pois_mean_GP(x=c(Y),
-                   prior_mean = 0*c(Y),
-                   s =  rep( scaling, ncol(Y)),
-                   prior_var = sigma2_pois )
     }else{
 
 
@@ -305,17 +301,20 @@ Pois_fSuSiE <- function(Y,
     iter=iter+1
     ##include mr.ash
 
-    #  par (mfrow=c(1,2))
+    if (print){
+        par (mfrow=c(1,2))
 
-    # plot ( Y[1,], col="blue")
-    #points ( exp(Mu_pm  [1,]))
-    # lines(exp(Mu_pm  [1,]), col="green")
+       plot ( Y[1,], col="blue")
+       points ( exp(Mu_pm  [1,]))
+      lines(exp(Mu_pm  [1,]), col="green")
 
 
-    #plot( Y[1,],exp(Mu_pm  [1,]))
+       plot( Y[1,],exp(Mu_pm  [1,]))
 
-    #abline(a=0,b=1)
-    #par (mfrow=c(1,1))
+       abline(a=0,b=1)
+      par (mfrow=c(1,1))
+    }
+
   }
 
 
