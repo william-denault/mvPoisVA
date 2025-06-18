@@ -28,7 +28,7 @@ library(mvPoisVA)
 library(fsusieR)
 library(susieR)
 library(ebnm)
- load("../data/case_where_poisson_fsusie_needed.RData")
+ load("../data/another_example.RData")
 ```
 
 These data are based on sample real GTeX RNAseq counts where we model the effect of 
