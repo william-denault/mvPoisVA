@@ -49,7 +49,7 @@ Pois_fSuSiE <- function(Y,
   if(missing(X)&missing(Z)){
     stop("Please provide a Z or a X matrix")
   }
-
+  post_processing           <- match.arg(post_processing)
   fit_approach <- "both"
   if(missing(X)){
     print("No correlated covariate provided, the algorithm will perform penalized regression only")
@@ -130,12 +130,27 @@ Pois_fSuSiE <- function(Y,
     }else{
 
 
-      tt <-    pois_mean_GP(x=c(Y),
-                            prior_mean = c(Mu_pm_init),
-                            s =  rep( scaling, ncol(Y)),
-                            prior_var = sigma2_pois )
-      Mu_pm <- matrix( tt$posterior$posteriorMean_latent,byrow = FALSE, ncol=ncol(Y))
-      Mu_pv <- matrix( tt$posterior$posteriorVar_latent ,byrow = FALSE, ncol=ncol(Y))
+      #tt <-    pois_mean_GP(x=c(Y),
+     #                       prior_mean = c(Mu_pm_init),
+     #                       s =  rep( scaling, ncol(Y)),
+     #                       prior_var = sigma2_pois )
+
+
+    #  Mu_pm <- matrix( tt$posterior$posteriorMean_latent,byrow = FALSE, ncol=ncol(Y))
+    #  Mu_pv <- matrix( tt$posterior$posteriorVar_latent ,byrow = FALSE, ncol=ncol(Y))
+
+      tm=list()
+      tv=list()
+      for ( i in 1: nrow(Y)){
+        tt <-    pois_mean_GP(x=c(Y[i,]),
+                              prior_mean = c(Mu_pm_init[i,]),
+                              s =  rep( scaling[i], ncol(Y)),
+                              prior_var = sigma2_pois )
+        tm[[i]]=tt$posterior$posteriorMean_latent
+        tv[[i]]=tt$posterior$posteriorVar_latent
+      }
+      Mu_pm <-do.call( rbind,tm)
+      Mu_pv <-do.call( rbind,tv)
     }
 
 
@@ -309,7 +324,7 @@ Pois_fSuSiE <- function(Y,
       lines(exp(Mu_pm  [1,]), col="green")
 
 
-       plot( Y[1,],exp(Mu_pm  [1,]))
+       plot( c(Y) ,exp(c(Mu_pm   )))
 
        abline(a=0,b=1)
       par (mfrow=c(1,1))
