@@ -22,7 +22,7 @@ Pois_fSuSiE <- function(Y,
                             ),
                             thresh_lowcount=1e-2,
                             prior_mv=  "mixture_normal_per_scale",
-                            post_processing=c("smash","TI","HMM","none"),
+                            post_processing=c("HMM","smash","TI","none"),
                             gridmult=sqrt(2),
                             nullweight.mrash=10,
                             init_pi0_w.mrash=10,
@@ -271,7 +271,7 @@ Pois_fSuSiE <- function(Y,
 
         cor_small       = cor_small,
         maxit           = maxit.fsusie,
-        post_processing = "HMM")
+        post_processing = post_processing)
 
 
 
